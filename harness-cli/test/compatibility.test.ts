@@ -92,6 +92,9 @@ test('GitHub Actions isolates project commands and publishes a trusted signed fi
   assert.match(workflow, /github\.event\.pull_request\.labels/);
   assert.match(workflow, /--risk-labels-json/);
   assert.doesNotMatch(workflow, /mapfile/);
+  assert.match(workflow, /git -C project update-ref refs\/heads\/harness-head "\$HEAD_SHA"/);
+  assert.match(workflow, /git -C project bundle create \.\.\/prepared\/project\.bundle refs\/heads\/harness-head \^"\$BASE_SHA"/);
+  assert.doesNotMatch(workflow, /bundle create \.\.\/prepared\/project\.bundle "\$BASE_SHA" "\$HEAD_SHA"/);
   assert.match(workflow, /approvals github/);
   assert.match(workflow, /--approvals/);
   assert.match(workflow, /--repository "\$GH_REPOSITORY"/);

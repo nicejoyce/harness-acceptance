@@ -83,21 +83,27 @@ export async function exportPublicSnapshot(options: PublicSnapshotOptions): Prom
     if (!inside(sourceRoot, sourcePath)) throw new Error(`Snapshot path escapes the source repository: ${relativePath}`);
     const metadata = await lstat(sourcePath);
     if (!metadata.isFile() || metadata.isSymbolicLink()) throw new Error(`Snapshot candidate must be a regular file: ${relativePath}`);
-    const outputPath = relativePath === 'CODEOWNERS.template' ? 'CODEOWNERS' : relativePath;
     let content = await readFile(sourcePath);
+    let outputs = [{ path: relativePath, content }];
     if (relativePath === 'CODEOWNERS.template') {
       const rendered = content.toString('utf8').replaceAll('{{ACCEPTANCE_REVIEWER_LOGIN}}', options.reviewer_login);
       if (rendered.includes('{{')) throw new Error('CODEOWNERS template contains an unresolved placeholder');
-      content = Buffer.from(rendered);
+      outputs = [
+        { path: relativePath, content },
+        { path: 'CODEOWNERS', content: Buffer.from(rendered) },
+      ];
     } else if (['harness/config/project-profile.yaml', 'harness-zh/config/project-profile.yaml'].includes(relativePath)) {
       content = renderApprovalRoles(content, options.reviewer_login, relativePath);
+      outputs = [{ path: relativePath, content }];
     }
-    const destination = path.resolve(outputRoot, outputPath);
-    if (!inside(outputRoot, destination)) throw new Error(`Snapshot path escapes the output directory: ${outputPath}`);
-    await mkdir(path.dirname(destination), { recursive: true });
-    await writeFile(destination, content);
-    exported.push(outputPath);
-    manifestFiles.push({ path: outputPath, sha256: sha256(content) });
+    for (const output of outputs) {
+      const destination = path.resolve(outputRoot, output.path);
+      if (!inside(outputRoot, destination)) throw new Error(`Snapshot path escapes the output directory: ${output.path}`);
+      await mkdir(path.dirname(destination), { recursive: true });
+      await writeFile(destination, output.content);
+      exported.push(output.path);
+      manifestFiles.push({ path: output.path, sha256: sha256(output.content) });
+    }
   }
 
   manifestFiles.sort((left, right) => left.path.localeCompare(right.path));

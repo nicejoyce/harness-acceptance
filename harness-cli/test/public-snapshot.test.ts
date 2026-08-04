@@ -44,6 +44,7 @@ test('exports only allowlisted files with an injected independent CODEOWNER', as
 
   assert.ok(result.files.includes('fixtures/sample/input.txt'), 'untracked allowlisted fixtures are exported');
   assert.equal(await readFile(path.join(output, 'CODEOWNERS'), 'utf8'), '/harness/ @nicejoyce @independent-reviewer\n');
+  assert.equal(await readFile(path.join(output, 'CODEOWNERS.template'), 'utf8'), '/harness/ @nicejoyce @{{ACCEPTANCE_REVIEWER_LOGIN}}\n');
   assert.equal(await readFile(path.join(output, 'harness/README.md'), 'utf8'), '# Harness\n');
   for (const root of ['harness', 'harness-zh']) {
     const profile = YAML.parse(await readFile(path.join(output, root, 'config/project-profile.yaml'), 'utf8')) as { approvals: { roles: Record<string, string[]> } };

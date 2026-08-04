@@ -1,0 +1,7 @@
+* @nicejoyce @{{ACCEPTANCE_REVIEWER_LOGIN}}
+/.github/workflows/ @nicejoyce @{{ACCEPTANCE_REVIEWER_LOGIN}}
+/harness/ @nicejoyce @{{ACCEPTANCE_REVIEWER_LOGIN}}
+/harness-zh/ @nicejoyce @{{ACCEPTANCE_REVIEWER_LOGIN}}
+/harness-cli/ @nicejoyce @{{ACCEPTANCE_REVIEWER_LOGIN}}
+/harness-cli/schemas/ @nicejoyce @{{ACCEPTANCE_REVIEWER_LOGIN}}
+/CODEOWNERS @nicejoyce @{{ACCEPTANCE_REVIEWER_LOGIN}}
