@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { cp, mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -21,6 +21,28 @@ test('completes validate, plan, run, and evidence verify', async () => {
     const result = spawnSync(process.execPath, [cli, ...args], { encoding: 'utf8' });
     assert.equal(result.status, 0, `${args.join(' ')}\n${result.stdout}\n${result.stderr}`);
   }
+});
+
+test('accepts a physical alias for the Git project root', async () => {
+  const output = await mkdtemp(path.join(tmpdir(), 'harness-git-alias-'));
+  const root = path.join(output, 'project');
+  const alias = path.join(output, 'project-alias');
+  await cp(path.resolve('fixtures/neutral-project'), root, { recursive: true });
+  await symlink(root, alias, process.platform === 'win32' ? 'junction' : 'dir');
+  const git = (...args: string[]) => spawnSync('git', args, { cwd: root, encoding: 'utf8' });
+  assert.equal(git('init').status, 0);
+  git('config', 'user.name', 'Harness Test');
+  git('config', 'user.email', 'harness@example.invalid');
+  git('add', '.');
+  git('commit', '-m', 'base');
+  const base = git('rev-parse', 'HEAD').stdout.trim();
+  await mkdir(path.join(root, 'src'));
+  await writeFile(path.join(root, 'src/example.txt'), 'head\n');
+  git('add', 'src/example.txt');
+  git('commit', '-m', 'head');
+  const head = git('rev-parse', 'HEAD').stdout.trim();
+  const plan = spawnSync(process.execPath, [cli, 'plan', '--root', root, '--project-root', alias, '--git-base', base, '--git-head', head, '--output', path.join(output, 'plan.json')], { encoding: 'utf8' });
+  assert.equal(plan.status, 0, `${plan.stdout}\n${plan.stderr}`);
 });
 
 test('rejects run and evidence verification after repository HEAD advances', async () => {

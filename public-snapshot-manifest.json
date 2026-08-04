@@ -19,7 +19,7 @@
     },
     {
       "path": "docs/acceptance/github-e2e-2026-08-04.md",
-      "sha256": "5553b3ee9e67a0b638c6d5cd25636a37b927b363fcb210af1316e9ce26335ece"
+      "sha256": "3bd88353a3f30920bf7af7e374ca49988f003af8ecb914d85bfa1c3e6d486d1b"
     },
     {
       "path": "docs/acceptance/github-e2e-template.md",
@@ -119,7 +119,7 @@
     },
     {
       "path": "harness-cli/src/cli.ts",
-      "sha256": "2e5cf77b6c96892d6914c4709e6f825972e573bc0c17f8ca816390b180fa340f"
+      "sha256": "a914e2ba188c51aaed5dddf7c3f32bfe37767c619fed8982afa2bddc8557f20f"
     },
     {
       "path": "harness-cli/src/context.ts",
@@ -135,7 +135,7 @@
     },
     {
       "path": "harness-cli/src/evidence.ts",
-      "sha256": "117ebf32a9da43e555de3fa7104ecd25b909bbd35854944365ee771d4bebc05d"
+      "sha256": "ad180d51b6962f954cb5313dbc68b90dbdace1524c934c7f3c055d95305807fe"
     },
     {
       "path": "harness-cli/src/exceptions.ts",
@@ -147,7 +147,7 @@
     },
     {
       "path": "harness-cli/src/git.ts",
-      "sha256": "7bc64798cb7d2ffc879525ff73186b4e56688abad754fb3af02122ee7d694a1f"
+      "sha256": "8d603d37d07290fcda6702ab5069ba72fb69db192cf9841042c6cf4e68f08437"
     },
     {
       "path": "harness-cli/src/github-approvals.ts",
@@ -171,7 +171,7 @@
     },
     {
       "path": "harness-cli/src/runner.ts",
-      "sha256": "9c4c20c72fb222d858ec362263bce3ddb13d152536382944b2ee84fafb834057"
+      "sha256": "4aa1e7c88aef90d91326a55b403dae24dcf95fd970eecb4cf9508474e33de17f"
     },
     {
       "path": "harness-cli/src/schema.ts",
@@ -231,7 +231,7 @@
     },
     {
       "path": "harness-cli/test/git.test.ts",
-      "sha256": "3b9da6ba6f35423bcef44e672289cf1cc829746c37d5e4daea474b85fbe811ae"
+      "sha256": "d095b45e168ddc037a4642e0ee5d406a386230cca3cca95c401455e68cacf848"
     },
     {
       "path": "harness-cli/test/github-approvals.test.ts",
@@ -263,7 +263,7 @@
     },
     {
       "path": "harness-cli/test/runner.test.ts",
-      "sha256": "75750b412602aa65a6c0dcfbb5c7286c5edb24d4a345589913bc2e98789f77e8"
+      "sha256": "3fe665ea2fc3433454c08038efddf2d33ca11584448b5149fdf8c74e51087995"
     },
     {
       "path": "harness-cli/test/signing.test.ts",
@@ -271,7 +271,7 @@
     },
     {
       "path": "harness-cli/test/workflow.test.ts",
-      "sha256": "f5f3cdd13ecb470d8739c6eb3660f0d2e22a98e7820ef55a131802b38c4b668a"
+      "sha256": "e207f733d47712510f2c44e61c0868989ea0696d1073835365b62d9414c3bda4"
     },
     {
       "path": "harness-zh/config/project-profile.example.yaml",

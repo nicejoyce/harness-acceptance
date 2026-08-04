@@ -8,7 +8,7 @@ import { contractsDigest, sha256, stableJson } from './hash.ts';
 import { redact } from './redaction.ts';
 import { PlanningError, verifyPlan } from './planner.ts';
 import { approvalForGate, approvalsForRole, validateApprovals } from './approvals.ts';
-import { assertGitPlanContext, gitRepositoryRoot } from './git.ts';
+import { assertGitPlanContext, canonicalPath, gitRepositoryRoot, pathsReferToSameLocation } from './git.ts';
 import { executionContextFromParts, executionContextsEqual } from './context.ts';
 import { terminateProcessTree } from './process-tree.ts';
 import type { ApprovalRecord, CiProvenance, CommandDescriptor, ContractBundle, EvidenceManifest, ExceptionRecord, ExecutionPlan, GateEvidence, GateState, PlannedGate } from './types.ts';
@@ -27,11 +27,11 @@ export interface RunOptions {
 }
 
 async function repositoryRoot(bundle: ContractBundle, projectRoot?: string): Promise<string> {
-  if (projectRoot) return path.resolve(projectRoot);
+  if (projectRoot) return canonicalPath(projectRoot);
   try {
     return await gitRepositoryRoot(bundle.root);
   } catch {
-    return path.resolve(bundle.root);
+    return canonicalPath(bundle.root);
   }
 }
 
@@ -135,7 +135,7 @@ export async function runPlan(bundle: ContractBundle, plan: ExecutionPlan, optio
   if (plan.source_revision || plan.source_base_revision) {
     if (!plan.source_revision || !plan.source_base_revision) throw new PlanningError('Git-bound plans require both source revisions');
     const gitRoot = await gitRepositoryRoot(root);
-    if (gitRoot !== path.resolve(root)) throw new PlanningError('Project root must be the Git repository root');
+    if (!await pathsReferToSameLocation(gitRoot, root)) throw new PlanningError('Project root must be the Git repository root');
     await assertGitPlanContext(root, plan.source_base_revision, plan.source_revision, plan.changed_files);
   } else {
     try {
