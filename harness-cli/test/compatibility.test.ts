@@ -59,11 +59,46 @@ test('GitHub Actions isolates project commands and publishes a trusted signed fi
   assert.doesNotMatch(workflow, /attestations:\s*write/);
   assert.doesNotMatch(workflow, /id-token:\s*write/);
   assert.doesNotMatch(workflow, /gh api --paginate --slurp --jq/);
+  const parsed = YAML.parse(workflow) as { permissions: Record<string, string>; jobs: Record<string, { permissions?: Record<string, string>; needs?: string | string[]; steps: Array<{ name?: string; env?: Record<string, string>; run?: string }> }> };
   assert.equal(workflow.match(/gh api --paginate [^\n]+ \| jq -s 'add'/g)?.length, 2);
+  const pipelineBlocks = Object.values(parsed.jobs)
+    .flatMap((job) => job.steps)
+    .map((step) => step.run)
+    .filter((run): run is string => Boolean(run?.match(/gh api --paginate [^\n]+ \| jq -s 'add'/)));
+  assert.equal(pipelineBlocks.length, 2);
+  for (const run of pipelineBlocks) {
+    assert.match(run, /^\s*set -euo pipefail\s*$/m);
+    assert.match(run, /set -euo pipefail[\s\S]*gh api --paginate [^\n]+ \| jq -s 'add'/);
+  }
+  assert.match(workflow, /refs\/heads\/harness-bundle-base/);
+  assert.match(workflow, /refs\/heads\/harness-bundle-head/);
+  const prepareSteps = parsed.jobs['prepare-context'].steps;
+  const bundleRun = prepareSteps.find((step) => step.name === 'Build immutable plan and approvals')?.run;
+  assert.ok(bundleRun);
+  assert.match(bundleRun, /git -C "project" update-ref "refs\/heads\/harness-bundle-base" "\$BASE_SHA"/);
+  assert.match(bundleRun, /git -C "project" update-ref "refs\/heads\/harness-bundle-head" "\$HEAD_SHA"/);
+  assert.match(bundleRun, /git -C "project" bundle create "\.\.\/prepared\/project\.bundle" "refs\/heads\/harness-bundle-base" "refs\/heads\/harness-bundle-head"/);
+  assert.doesNotMatch(bundleRun, /git -C "project" bundle create [^\n]*--all/);
+  assert.match(bundleRun, /git -C "project" bundle verify "\.\.\/prepared\/project\.bundle"/);
+  assert.match(bundleRun, /git -C "project" update-ref -d "refs\/heads\/harness-bundle-base"/);
+  assert.match(bundleRun, /git -C "project" update-ref -d "refs\/heads\/harness-bundle-head"/);
+  assert.match(bundleRun, /trap cleanup_bundle_refs EXIT/);
+  assert.match(bundleRun, /trap - EXIT/);
+  assert.ok(bundleRun.indexOf('trap cleanup_bundle_refs EXIT') < bundleRun.indexOf('git -C "project" update-ref "refs/heads/harness-bundle-base"'));
+  assert.ok(bundleRun.indexOf('git -C "project" update-ref') < bundleRun.indexOf('git -C "project" bundle create'));
+  assert.ok(bundleRun.indexOf('git -C "project" bundle create') < bundleRun.indexOf('git -C "project" bundle verify'));
+  assert.ok(bundleRun.indexOf('git -C "project" update-ref -d "refs/heads/harness-bundle-head"') < bundleRun.indexOf('trap - EXIT'));
+  const recreateCheckout = parsed.jobs.harness.steps.find((step) => step.name === 'Recreate a clean pull request checkout')?.run;
+  assert.ok(recreateCheckout);
+  assert.match(recreateCheckout, /git clone --no-checkout "prepared\/project\.bundle" "project"/);
+  assert.match(recreateCheckout, /git -C "project" checkout --detach "\$HEAD_SHA"/);
+  assert.match(recreateCheckout, /git -C "project" rev-parse --verify "\$BASE_SHA\^\{commit\}"/);
+  assert.match(recreateCheckout, /git -C "project" rev-parse --verify "\$HEAD_SHA\^\{commit\}"/);
+  const recreateCheckoutStep = parsed.jobs.harness.steps.find((step) => step.name === 'Recreate a clean pull request checkout');
+  assert.equal(recreateCheckoutStep?.env?.BASE_SHA, '${{ github.event.pull_request.base.sha }}');
   assert.match(workflow, /prepare-context:/);
   assert.match(workflow, /harness-final:/);
   assert.match(workflow, /download-artifact@v4/);
-  const parsed = YAML.parse(workflow) as { permissions: Record<string, string>; jobs: Record<string, { permissions?: Record<string, string>; needs?: string | string[]; steps: Array<{ name?: string; env?: Record<string, string>; run?: string }> }> };
   assert.deepEqual(parsed.jobs.harness.permissions, {});
   assert.equal(parsed.jobs.harness.needs, 'prepare-context');
   assert.deepEqual(parsed.jobs['harness-final'].permissions, { contents: 'read', 'pull-requests': 'read', checks: 'write' });
@@ -92,9 +127,6 @@ test('GitHub Actions isolates project commands and publishes a trusted signed fi
   assert.match(workflow, /github\.event\.pull_request\.labels/);
   assert.match(workflow, /--risk-labels-json/);
   assert.doesNotMatch(workflow, /mapfile/);
-  assert.match(workflow, /git -C project update-ref refs\/heads\/harness-head "\$HEAD_SHA"/);
-  assert.match(workflow, /git -C project bundle create \.\.\/prepared\/project\.bundle refs\/heads\/harness-head \^"\$BASE_SHA"/);
-  assert.doesNotMatch(workflow, /bundle create \.\.\/prepared\/project\.bundle "\$BASE_SHA" "\$HEAD_SHA"/);
   assert.match(workflow, /approvals github/);
   assert.match(workflow, /--approvals/);
   assert.match(workflow, /--repository "\$GH_REPOSITORY"/);
