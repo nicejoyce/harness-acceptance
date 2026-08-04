@@ -3,7 +3,7 @@
   "files": [
     {
       "path": ".github/workflows/harness.yml",
-      "sha256": "d719e158b011452114ecc569bde822d78b57410a2beb810e7e273363d87c53c7"
+      "sha256": "d0e8372ab2029211cebbfe9867221eb96c0d242bf9364dbe3c5097dc852a4028"
     },
     {
       "path": ".gitignore",
@@ -203,7 +203,7 @@
     },
     {
       "path": "harness-cli/test/compatibility.test.ts",
-      "sha256": "ca4ec3b4269d877b54a2407267187c70ed5ee5ce2cc1da7efd198f5cbc10c3f4"
+      "sha256": "9e7879a3b8bfe5cf1de8db8238b1c470d40fbfe4041ac0879f045e05a9694e9b"
     },
     {
       "path": "harness-cli/test/contracts.test.ts",
