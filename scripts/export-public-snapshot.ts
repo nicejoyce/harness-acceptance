@@ -3,6 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { lstat, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import YAML from 'yaml';
 
 export interface PublicSnapshotOptions {
   source_root: string;
@@ -53,6 +54,14 @@ function validateReviewerLogin(login: string): void {
   if (!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/.test(login) || login.includes('--')) throw new Error('Invalid GitHub reviewer login');
 }
 
+function renderApprovalRoles(content: Buffer, reviewerLogin: string, relativePath: string): Buffer {
+  const profile = YAML.parse(content.toString('utf8')) as { approvals?: { roles?: unknown } };
+  const roles = profile?.approvals?.roles;
+  if (roles === null || typeof roles !== 'object' || Array.isArray(roles)) throw new Error(`Public snapshot profile has invalid approval roles: ${relativePath}`);
+  for (const role of Object.keys(roles)) (roles as Record<string, string[]>)[role] = [reviewerLogin];
+  return Buffer.from(YAML.stringify(profile, { lineWidth: 0 }));
+}
+
 export async function exportPublicSnapshot(options: PublicSnapshotOptions): Promise<PublicSnapshotResult> {
   validateReviewerLogin(options.reviewer_login);
   const sourceRoot = path.resolve(options.source_root);
@@ -80,6 +89,8 @@ export async function exportPublicSnapshot(options: PublicSnapshotOptions): Prom
       const rendered = content.toString('utf8').replaceAll('{{ACCEPTANCE_REVIEWER_LOGIN}}', options.reviewer_login);
       if (rendered.includes('{{')) throw new Error('CODEOWNERS template contains an unresolved placeholder');
       content = Buffer.from(rendered);
+    } else if (['harness/config/project-profile.yaml', 'harness-zh/config/project-profile.yaml'].includes(relativePath)) {
+      content = renderApprovalRoles(content, options.reviewer_login, relativePath);
     }
     const destination = path.resolve(outputRoot, outputPath);
     if (!inside(outputRoot, destination)) throw new Error(`Snapshot path escapes the output directory: ${outputPath}`);
