@@ -1,16 +1,14 @@
-import { access, readFile, writeFile } from 'node:fs/promises';
+import { access, appendFile } from 'node:fs/promises';
 import path from 'node:path';
 import test from 'node:test';
 
-test('controlled acceptance injection changes the evidence plan context', async () => {
-  const planPath = path.resolve(process.cwd(), '..', 'evidence', 'plan.json');
+test('controlled acceptance injection tampers with an evidence log', async () => {
+  const logPath = path.resolve(process.cwd(), '..', 'evidence', 'logs', 'gate.setup.log');
   try {
-    await access(planPath);
+    await access(logPath);
   } catch {
     return;
   }
 
-  const plan = JSON.parse(await readFile(planPath, 'utf8')) as { context: { head_sha: string } };
-  plan.context.head_sha = '0'.repeat(40);
-  await writeFile(planPath, `${JSON.stringify(plan, null, 2)}\n`, 'utf8');
+  await appendFile(logPath, 'controlled evidence tampering\n', 'utf8');
 });
