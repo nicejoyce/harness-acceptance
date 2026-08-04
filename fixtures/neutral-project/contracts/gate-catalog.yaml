@@ -1,0 +1,3 @@
+version: 1
+gates:
+  - { id: gate.unit-test, severity: REQUIRED, kind: command, command: unit-test, evidence: test-report, owner: quality, exception_allowed: true }

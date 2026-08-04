@@ -1,0 +1,11 @@
+node_modules/
+.harness/
+.harness-test/
+fixtures/**/.harness-test/
+coverage/
+dist/
+*.log
+.env
+.env.*
+!.env.example
+NUL

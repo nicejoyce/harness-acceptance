@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "gate_ids", "role", "approver", "source", "repository", "pull_request", "review_id", "commit_sha", "approval_reference", "approved_at", "expires_at"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^APP-[A-Za-z0-9.-]+$" },
+    "gate_ids": { "type": "array", "minItems": 1, "items": { "type": "string" }, "uniqueItems": true },
+    "role": { "type": "string", "minLength": 1 },
+    "approver": { "type": "string", "minLength": 1 },
+    "source": { "const": "github-review" },
+    "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+    "pull_request": { "type": "integer", "minimum": 1 },
+    "review_id": { "type": "integer", "minimum": 1 },
+    "commit_sha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+    "approval_reference": { "type": "string", "pattern": "^https://github\\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/pull/[1-9][0-9]*#pullrequestreview-[1-9][0-9]*$" },
+    "approved_at": { "type": "string", "minLength": 1 },
+    "expires_at": { "type": "string", "minLength": 1 }
+  }
+}

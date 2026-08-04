@@ -1,0 +1,5 @@
+version: 3
+modules:
+  quality_engineering: { prefix: TEST, owner: quality }
+rules:
+  - { id: TEST-001, module: quality_engineering, severity: REQUIRED, gates: [gate.unit-test], exception_allowed: true }

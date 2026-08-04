@@ -1,0 +1,4 @@
+version: 1
+gates:
+  - { id: gate.setup, severity: REQUIRED, kind: command, command: dependency-setup, evidence: command-output, owner: platform, exception_allowed: true }
+  - { id: gate.unit-test, severity: REQUIRED, kind: command, command: unit-test, evidence: test-report, owner: quality, exception_allowed: true, depends_on: [gate.setup] }

@@ -1,0 +1,645 @@
+{
+  "version": 1,
+  "files": [
+    {
+      "path": ".github/workflows/harness.yml",
+      "sha256": "a2f07512a53bd0007cb531e2cf62701faecea8e8985928610b81c5fd4fa3345d"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "34c413e2649af6a7b8718753a2fd1ece10cf5a7bda107b7a4cd36b71648c74ed"
+    },
+    {
+      "path": "CODEOWNERS",
+      "sha256": "4f5216a85d46d766d0ddf9c4de38c9c044a48f6016d7b18e4206deb363696220"
+    },
+    {
+      "path": "docs/acceptance/github-e2e-template.md",
+      "sha256": "064b93ec9eaaabcd8f4abe14f4840c2eb16065a3356a142593011de3ac6787d2"
+    },
+    {
+      "path": "fixtures/neutral-project/config/project-profile.yaml",
+      "sha256": "7515c325ad7668116d201e6aca3e4434160c10dfcbbbc437de79de225ac92526"
+    },
+    {
+      "path": "fixtures/neutral-project/contracts/gate-catalog.yaml",
+      "sha256": "3df4c4770429cac252d30a8ce7fc42ea4997f1a152d87ca506f49b9082614a6e"
+    },
+    {
+      "path": "fixtures/neutral-project/contracts/routes.yaml",
+      "sha256": "fe9681d7586decd30aaf90ee89d437d6824114588fe09427cdf988a884bac654"
+    },
+    {
+      "path": "fixtures/neutral-project/rules/registry.yaml",
+      "sha256": "1576cdb2ce66bb9ad4fef9223c3ee652e28ee15c452c8bfd939420a87f08dc14"
+    },
+    {
+      "path": "fixtures/python-project/config/project-profile.yaml",
+      "sha256": "b983924df723fcbd5635bd8c063b4e429de6cbd6f2fccfc0305319a96a9d83f7"
+    },
+    {
+      "path": "fixtures/python-project/contracts/gate-catalog.yaml",
+      "sha256": "1462023e172377bccf9607c60b13bde06cddf6616b855cae147991f85d0348df"
+    },
+    {
+      "path": "fixtures/python-project/contracts/routes.yaml",
+      "sha256": "fe9681d7586decd30aaf90ee89d437d6824114588fe09427cdf988a884bac654"
+    },
+    {
+      "path": "fixtures/python-project/rules/registry.yaml",
+      "sha256": "1576cdb2ce66bb9ad4fef9223c3ee652e28ee15c452c8bfd939420a87f08dc14"
+    },
+    {
+      "path": "fixtures/python-project/src/__init__.py",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "fixtures/python-project/src/calculator.py",
+      "sha256": "0049214146c09e015865e54237ecc4d15c9e043886cb20d1d9c68659bf744bc9"
+    },
+    {
+      "path": "fixtures/python-project/tests/test_calculator.py",
+      "sha256": "148063fd9b44af69b25af4993d8f703adcdfd1a5ab73d10a575637787ef0e8bd"
+    },
+    {
+      "path": "harness-cli/schemas/approval.schema.json",
+      "sha256": "0dd8985f4ec89e2a3e9d8a8bd91a98da42e804de09839fb19fce3e5aa0d39d55"
+    },
+    {
+      "path": "harness-cli/schemas/evidence.schema.json",
+      "sha256": "e0686126265f9bc16f795999b2472107332636176a4675178dc5c0d41414bcab"
+    },
+    {
+      "path": "harness-cli/schemas/exception.schema.json",
+      "sha256": "f03b58bd6c228840005f77727c6e65ef03d237f6d9ed415b3cfcb8d360861140"
+    },
+    {
+      "path": "harness-cli/schemas/final.schema.json",
+      "sha256": "f9ad2bb5a6cd56b6c7f73d67c1a1ac2074f0cdc626169369433110b6158e92d3"
+    },
+    {
+      "path": "harness-cli/schemas/gate-catalog.schema.json",
+      "sha256": "c8d9f1bb1305913a7824d8aa239894764403afd3050bb3924259657bebb5ee7d"
+    },
+    {
+      "path": "harness-cli/schemas/plan.schema.json",
+      "sha256": "a27b1fa32db76e73454ed62688f65ec778925821a6e80762a0e88e55fe96e100"
+    },
+    {
+      "path": "harness-cli/schemas/project-profile.schema.json",
+      "sha256": "29df90defc9967ef6104c8b845f7bfc8dd18e36637c3e6e769fbcba498e78aac"
+    },
+    {
+      "path": "harness-cli/schemas/registry.schema.json",
+      "sha256": "eee35da79cdcd7b3862b3791e40bf7c28fe4cc8414d586214d4a3caae820b524"
+    },
+    {
+      "path": "harness-cli/schemas/routes.schema.json",
+      "sha256": "aa108e3a26723f4e9652cc5398093de8d101d9c8565dd593d16e810cb88203b8"
+    },
+    {
+      "path": "harness-cli/src/aggregate.ts",
+      "sha256": "98ca99a67ffb7cc9980b62f314aefd8c7b46ac45adc9388244418fb72d591b69"
+    },
+    {
+      "path": "harness-cli/src/approvals.ts",
+      "sha256": "917bd47559e6dfaec8312cf8e247c03b8b311e764d072c7f8214306d3be7b3bd"
+    },
+    {
+      "path": "harness-cli/src/classifier.ts",
+      "sha256": "39cd559d43b9ccc0aeb027d714e558a35c475a827f62a7e6b75e2e583ccc4d8c"
+    },
+    {
+      "path": "harness-cli/src/cli.ts",
+      "sha256": "2e5cf77b6c96892d6914c4709e6f825972e573bc0c17f8ca816390b180fa340f"
+    },
+    {
+      "path": "harness-cli/src/context.ts",
+      "sha256": "9af33fa4412e788fccc0e3b6d3e5f077ea34f59d7375182082113b84f6135609"
+    },
+    {
+      "path": "harness-cli/src/contracts.ts",
+      "sha256": "9e31554514eaf98e07a3e1d9103bcd9b9b0d8d4c0109daa0cc41b33ccb15e371"
+    },
+    {
+      "path": "harness-cli/src/diagnostics.ts",
+      "sha256": "e7ba4323b0649b5c05d4cb0212b3ee57a3db9cc031e3cf8691b0dc623c25f61c"
+    },
+    {
+      "path": "harness-cli/src/evidence.ts",
+      "sha256": "117ebf32a9da43e555de3fa7104ecd25b909bbd35854944365ee771d4bebc05d"
+    },
+    {
+      "path": "harness-cli/src/exceptions.ts",
+      "sha256": "6ab80f4fc54c4e9fcca66fe58bb8b85f5b6f88ddc2f981019d55ae24179b5b58"
+    },
+    {
+      "path": "harness-cli/src/exit-codes.ts",
+      "sha256": "9797eae9bc7c4285085a4b5f53ba2d4b506c00a5594713bb4403b9cc93a93103"
+    },
+    {
+      "path": "harness-cli/src/git.ts",
+      "sha256": "7bc64798cb7d2ffc879525ff73186b4e56688abad754fb3af02122ee7d694a1f"
+    },
+    {
+      "path": "harness-cli/src/github-approvals.ts",
+      "sha256": "85780944387059b0f10ac6359037ad3d5514038dff0524c192068a693d67ec03"
+    },
+    {
+      "path": "harness-cli/src/hash.ts",
+      "sha256": "a0838909144f723503e6b3ab4722f2ecf93333b4e20e2415a6adbad6e43414cf"
+    },
+    {
+      "path": "harness-cli/src/planner.ts",
+      "sha256": "d204ed53dab83b231a7958e62f076b5138aab605460b8f656d691cb50f087121"
+    },
+    {
+      "path": "harness-cli/src/process-tree.ts",
+      "sha256": "a281a1cf02195ce3b72512301d5626111c5153a67be7c965a267d8a69f7fa83b"
+    },
+    {
+      "path": "harness-cli/src/redaction.ts",
+      "sha256": "934f4a95022abb4ed8a1e1fdf632826aff1a8f93cf0605a4a04fcaa55f83ddb2"
+    },
+    {
+      "path": "harness-cli/src/runner.ts",
+      "sha256": "9c4c20c72fb222d858ec362263bce3ddb13d152536382944b2ee84fafb834057"
+    },
+    {
+      "path": "harness-cli/src/schema.ts",
+      "sha256": "cb878119b86165554b2cae091e295ef11ad60da7600c596e4382546aa3201ca3"
+    },
+    {
+      "path": "harness-cli/src/signing.ts",
+      "sha256": "929cd6641a8f66002a7788473a183c5706076259d1aaaf256a408bebc57b6aa4"
+    },
+    {
+      "path": "harness-cli/src/types.ts",
+      "sha256": "82d834c807998491a51aabe73d8769dc11dedd80001037f00cdc6ece37a60d49"
+    },
+    {
+      "path": "harness-cli/src/windows-process-tree.ps1",
+      "sha256": "3e2f77c3f52ef4a143867b152efa6624693e68857c2108e202745bd83151bc52"
+    },
+    {
+      "path": "harness-cli/test/aggregate.test.ts",
+      "sha256": "f54ec30bf921bd1cfc30410c802635fc32933ff9abc5d0d0f0da705a23c46ea2"
+    },
+    {
+      "path": "harness-cli/test/approvals.test.ts",
+      "sha256": "2e52fb68f0b245270b3e08eca03d2ea43b2eec875ab58cb5de8924fba3ce13bf"
+    },
+    {
+      "path": "harness-cli/test/classifier.test.ts",
+      "sha256": "dae329e3f5569fdecdf2350662b6153470e7498b1227793a8b1e69fe50e49244"
+    },
+    {
+      "path": "harness-cli/test/cli.test.ts",
+      "sha256": "62e2ec5ec04fc6f7986b0d10eea4ddc7dcb55a39d0350a543442b5de84b64257"
+    },
+    {
+      "path": "harness-cli/test/compatibility.test.ts",
+      "sha256": "aa658733faaabaeb6a743ce14c3b84715f18a43c444c1e80bb8bdaa10d131324"
+    },
+    {
+      "path": "harness-cli/test/contracts.test.ts",
+      "sha256": "d41ede988e3f17264fba4990a73b44331b8c996285299dbe3045196b6f7cd26d"
+    },
+    {
+      "path": "harness-cli/test/evidence.test.ts",
+      "sha256": "a17732d8b3c870e52270f93e79b76eab25496b8e7652f6e366ed73893575c40a"
+    },
+    {
+      "path": "harness-cli/test/exceptions.test.ts",
+      "sha256": "b4d2ff5313adcd8ebebfee19d8ae37540b880ee17873d22b6566d2889eceacd5"
+    },
+    {
+      "path": "harness-cli/test/final-cli.test.ts",
+      "sha256": "0d99e40825d5af4611199f658cd62be7bf5fb15f1fd7e4b05b038693e985a6b9"
+    },
+    {
+      "path": "harness-cli/test/git.test.ts",
+      "sha256": "3b9da6ba6f35423bcef44e672289cf1cc829746c37d5e4daea474b85fbe811ae"
+    },
+    {
+      "path": "harness-cli/test/github-approvals.test.ts",
+      "sha256": "764cfc57af2c39ab860fdc950ec719789b72d7515366a8451c2239f3b8bdfcd6"
+    },
+    {
+      "path": "harness-cli/test/parity.test.ts",
+      "sha256": "53ede6fd963c18a5ff817793f714fa0ad3e56b15781e841739742a0fcb8a7f3f"
+    },
+    {
+      "path": "harness-cli/test/planner.test.ts",
+      "sha256": "15db0f62528b07e23683d5abb980ee27c7d15308a5a3b38510dbf7f11b0ddc62"
+    },
+    {
+      "path": "harness-cli/test/process-tree.test.ts",
+      "sha256": "4c09f404217d6a93a480bbb746c4c6d2cf293bb205dbb5695bea567138dbe0d7"
+    },
+    {
+      "path": "harness-cli/test/public-snapshot.test.ts",
+      "sha256": "ec92c0c09abe1e8dcb9bf54bdf0cd87cfbad9608d28925db5060f90553fe4aa3"
+    },
+    {
+      "path": "harness-cli/test/python-fixture.test.ts",
+      "sha256": "c29d617a3c70b368379aed31e52c63ad6947b2ee2094b2e1d8bf984c8415ab96"
+    },
+    {
+      "path": "harness-cli/test/registry.test.ts",
+      "sha256": "bb2a999f4824c3ec0dd10345428c2cd8ee788f0551518721c8c569a2d494b69f"
+    },
+    {
+      "path": "harness-cli/test/runner.test.ts",
+      "sha256": "75750b412602aa65a6c0dcfbb5c7286c5edb24d4a345589913bc2e98789f77e8"
+    },
+    {
+      "path": "harness-cli/test/signing.test.ts",
+      "sha256": "c8bd65bf6d36b8e7b1f0bfbf9c1c0b49380927f4a6aee58889b2299f59f5d796"
+    },
+    {
+      "path": "harness-cli/test/workflow.test.ts",
+      "sha256": "f5f3cdd13ecb470d8739c6eb3660f0d2e22a98e7820ef55a131802b38c4b668a"
+    },
+    {
+      "path": "harness-zh/config/project-profile.example.yaml",
+      "sha256": "1211fc59a4945c06d8d6bb196f5f681845dfb6ad6519f88101169f830b92fcd3"
+    },
+    {
+      "path": "harness-zh/config/project-profile.yaml",
+      "sha256": "6a99df8495e405842cfc1adb53f5c5a775664283ff5d6075bf30142976020548"
+    },
+    {
+      "path": "harness-zh/contracts/gate-catalog.yaml",
+      "sha256": "7078a88bd4b3a017a48d3fabd28553efd46ba72268078e6f3dd4f716f545e6aa"
+    },
+    {
+      "path": "harness-zh/contracts/quality-baseline.yaml",
+      "sha256": "f42d1c4c87536a420801ee9ca375e89737766ef604557d26455b828e60917bd1"
+    },
+    {
+      "path": "harness-zh/contracts/quality-gates.yaml",
+      "sha256": "1d55f71f8640cd02e9865639ceaa4b3caa3e522d512723de82eb4dfa44e044b9"
+    },
+    {
+      "path": "harness-zh/contracts/routes.yaml",
+      "sha256": "ac9fac3cbd8297dbbcdd8150c70ab8368d9655d785b6f71506d15c974ace4ad1"
+    },
+    {
+      "path": "harness-zh/enforcement/ci-gates.example.yaml",
+      "sha256": "06f24e9ea574172161bafdd36bb2d18744a294278717425d0289ba46934eabb0"
+    },
+    {
+      "path": "harness-zh/enforcement/pre-commit.example.yaml",
+      "sha256": "b7dd7d18bbf03904f2c67c00f012d453a4ddb4e708cd3cb82750be27b3f57996"
+    },
+    {
+      "path": "harness-zh/enforcement/README.md",
+      "sha256": "101bf947ffc2b0623123ae0c666c454891ed07d025c0a7cc46e644c13fd466b4"
+    },
+    {
+      "path": "harness-zh/governance/document-hierarchy.md",
+      "sha256": "7e41e18eb368e65272592fa96eff3315fd0954170724d7d5b189b30af5b01b6b"
+    },
+    {
+      "path": "harness-zh/governance/document-triggers.md",
+      "sha256": "6ef3d97e75de72631d6892f548cbb6664ef077c2787c3fc8801b476fce22029b"
+    },
+    {
+      "path": "harness-zh/governance/exception-policy.md",
+      "sha256": "a7f789223705cf7d9b32708fc80d0674bdf833023117fb54e3419992cf77dcee"
+    },
+    {
+      "path": "harness-zh/governance/maturity-model.md",
+      "sha256": "01bf8224f6968f70e686c02a97d6614860c049bbd2a78063880053f56108b09e"
+    },
+    {
+      "path": "harness-zh/governance/record-ownership.md",
+      "sha256": "4bfe64067e2798177a95f549e82a8f3a8d735e735841bad0439fccae23aea653"
+    },
+    {
+      "path": "harness-zh/governance/trusted-execution.md",
+      "sha256": "15b8ecec7c1b10ea225279dd0a46550624902e0a7b63838e31ad22b516e8fa94"
+    },
+    {
+      "path": "harness-zh/policies/code-quality-baseline.md",
+      "sha256": "37da6927b840dc1f0c2bf775a2f0da5f120b175400c1146c07d333a80830ca93"
+    },
+    {
+      "path": "harness-zh/policies/data-and-dependencies.md",
+      "sha256": "d8be08694e30aa0708d6490acc0fc653adc76f3ed2be345691047b285b32ef3a"
+    },
+    {
+      "path": "harness-zh/policies/engineering-standards.md",
+      "sha256": "4b05012b40b19f9a16fe5539a9d5cb40db33af5c7864d31f999524b4531f81f2"
+    },
+    {
+      "path": "harness-zh/policies/security-and-agent-boundaries.md",
+      "sha256": "90d9de36bed5b7a6ccd19d236fcc5840fd6f14772c985a9747f5feaea24c2765"
+    },
+    {
+      "path": "harness-zh/README.md",
+      "sha256": "784846af9da4933572350257d0286caa78a2502dcaa76a48dbe23f71d5bd9939"
+    },
+    {
+      "path": "harness-zh/rules/global.md",
+      "sha256": "c8da1273defc5a0926f6f38f0d7eac05e98e4f91332a15098c9cbe3297189c0d"
+    },
+    {
+      "path": "harness-zh/rules/infra.md",
+      "sha256": "1734fd5240654acc1f01cfe9457716550f4bb90b0ab7c7b544a4bdba4c3abb81"
+    },
+    {
+      "path": "harness-zh/rules/registry.yaml",
+      "sha256": "d7cdc32deaaed4a8f6dca8f6108136ca6eb2a3d444cf747cf3603331893a729e"
+    },
+    {
+      "path": "harness-zh/rules/stacks/README.md",
+      "sha256": "04ae19221d5e4f73bffcef8109b56011cd86b2e4dbcd4dd190f060229723bb56"
+    },
+    {
+      "path": "harness-zh/rules/testing.md",
+      "sha256": "7dbfaf9eeaf1aaab0a45fd5343fe043e6a1db63bed4e5b5294588ad599e2ba24"
+    },
+    {
+      "path": "harness-zh/scripts/Validate-Harness.ps1",
+      "sha256": "46209702ec6c4ee1cdd350e571f05ebabda75daacd1a66d02c9411ac113095c0"
+    },
+    {
+      "path": "harness-zh/skills/debug.md",
+      "sha256": "4c0b09ea36f925142c98bb7586f73ec261dd0e8577403e6bcd681de970267c74"
+    },
+    {
+      "path": "harness-zh/skills/incident.md",
+      "sha256": "00007d9394d66befe128df315b03a80c7c572b36aba19d32dab664276749f158"
+    },
+    {
+      "path": "harness-zh/skills/release.md",
+      "sha256": "7bab90baa8486f4a6478aed288e0869d570843a460b049fb3e135ddf9d3b5560"
+    },
+    {
+      "path": "harness-zh/skills/review.md",
+      "sha256": "95962aa26ea2b68bd94aefd7dcb8d70e2b71f56ac6e3788546e431fb2b265f78"
+    },
+    {
+      "path": "harness-zh/skills/setup.md",
+      "sha256": "d5bc07c14302ac805cb3c41f5a564f527633669000d23c86a529d4992b4a80a4"
+    },
+    {
+      "path": "harness-zh/templates/architecture-decision-record.md",
+      "sha256": "724a58bd371e832904fa2d135c5290d10115cba5cb558ecf90739dabb5dd3bee"
+    },
+    {
+      "path": "harness-zh/templates/bug-tracker.md",
+      "sha256": "08f2c60b7fd4b7e6889f9371ed75d4ee1b420505db0a585330512e64bf0c0652"
+    },
+    {
+      "path": "harness-zh/templates/design-record.md",
+      "sha256": "8230cc03243347eb52a6140d90ba81dc692d50f038e8e68b391289856f699ebe"
+    },
+    {
+      "path": "harness-zh/templates/incident-record.md",
+      "sha256": "412c75b508d2d16d26ea710b9dc6abb4d8ec67e500c172f0f8d767b396d63113"
+    },
+    {
+      "path": "harness-zh/templates/progress.md",
+      "sha256": "fd1cb2eadd7fa60d9497edd0dbd4ab749eb6de4d1438cd6a4bf241a8d75f3604"
+    },
+    {
+      "path": "harness-zh/templates/pull-request-record.md",
+      "sha256": "2bed7b3c49c51ce98c61c0348d597275d5b444957303cda141442edcccdb548d"
+    },
+    {
+      "path": "harness-zh/templates/release-record.md",
+      "sha256": "424c6f7dd377d0b2fd6ca4d83b4eec03048582be023ce0cd0318fe39fe1a880a"
+    },
+    {
+      "path": "harness-zh/templates/requirement-record.md",
+      "sha256": "b24c5040b9628b532b6c5481120c1aa75c4999c90515c09fac3dff51427dd7d5"
+    },
+    {
+      "path": "harness-zh/templates/risk-assessment.md",
+      "sha256": "484482955cad800426412ef23f08fcafc79ec450609b78a307577638fd9c0c16"
+    },
+    {
+      "path": "harness-zh/templates/test-plan.md",
+      "sha256": "ed21ed7eee9db840ab5a2dfeb3c55d5790a8e8a373cf9bf278777981b517fdc1"
+    },
+    {
+      "path": "harness-zh/tests/Test-EnterpriseBaseline.ps1",
+      "sha256": "4887a6180ad3685d0d7898f99cc816efeaabf950c4cf0895b12a0f437b45930b"
+    },
+    {
+      "path": "harness-zh/tests/Test-Harness.ps1",
+      "sha256": "2a4fa7bda360771c82ec36585abfcb2be47c59552fb54ffcb04c8ce1e6886368"
+    },
+    {
+      "path": "harness-zh/workflows/change-delivery.md",
+      "sha256": "78f98fd028f798435cb8dd3e31bd099a568a4883f87dc25454a70a09d97586ad"
+    },
+    {
+      "path": "harness-zh/workflows/incident-response.md",
+      "sha256": "cb7b16f5dda27d4f0beed1f3cbd0b9b3dcde87c44f0397511ea64b06526706b5"
+    },
+    {
+      "path": "harness/config/project-profile.example.yaml",
+      "sha256": "1211fc59a4945c06d8d6bb196f5f681845dfb6ad6519f88101169f830b92fcd3"
+    },
+    {
+      "path": "harness/config/project-profile.yaml",
+      "sha256": "6a99df8495e405842cfc1adb53f5c5a775664283ff5d6075bf30142976020548"
+    },
+    {
+      "path": "harness/contracts/gate-catalog.yaml",
+      "sha256": "7078a88bd4b3a017a48d3fabd28553efd46ba72268078e6f3dd4f716f545e6aa"
+    },
+    {
+      "path": "harness/contracts/quality-baseline.yaml",
+      "sha256": "9656e4605253f10b05c4cc219b46dca0e44dacfe7a929ca2359f8811d9956b87"
+    },
+    {
+      "path": "harness/contracts/quality-gates.yaml",
+      "sha256": "1d55f71f8640cd02e9865639ceaa4b3caa3e522d512723de82eb4dfa44e044b9"
+    },
+    {
+      "path": "harness/contracts/routes.yaml",
+      "sha256": "ac9fac3cbd8297dbbcdd8150c70ab8368d9655d785b6f71506d15c974ace4ad1"
+    },
+    {
+      "path": "harness/enforcement/ci-gates.example.yaml",
+      "sha256": "a90b5ea536ae8b81aeb5ab34ba3619003a2e45b0a0c48b476073d74ff73a85b4"
+    },
+    {
+      "path": "harness/enforcement/pre-commit.example.yaml",
+      "sha256": "ea49fa3a77104c76662f721d5b29fce205ac46825b42fe77b31ad5352df75d7a"
+    },
+    {
+      "path": "harness/enforcement/README.md",
+      "sha256": "355a485c876cc843436f25a98ccec5bc986e4de5bb6dd33eba82d9d5d8182319"
+    },
+    {
+      "path": "harness/governance/document-hierarchy.md",
+      "sha256": "6e98f9eda1a45e2ed4dbee24d6440a80d8d5e58d29133a78b7400fcff19bdfd2"
+    },
+    {
+      "path": "harness/governance/document-triggers.md",
+      "sha256": "379b9ca8920bd06811ec4d781aa85bfc0a5f62ce103af8a54354838f09e11bcf"
+    },
+    {
+      "path": "harness/governance/exception-policy.md",
+      "sha256": "058fe298b0fb62ab6822669744828fef0cecf134eae4aa184c1c9902f91c5561"
+    },
+    {
+      "path": "harness/governance/maturity-model.md",
+      "sha256": "8423cfc69c10590228322e3cf7877a125161ff305126bef5c8448998b29fc495"
+    },
+    {
+      "path": "harness/governance/record-ownership.md",
+      "sha256": "e6988290728468e995d99880f85f484e9a615ee4dce621f636b8faad6a81072f"
+    },
+    {
+      "path": "harness/governance/trusted-execution.md",
+      "sha256": "2498b8a1c4d5a00910f8d7491c416f38c3432cddc3bd7255f70f968dfab5148e"
+    },
+    {
+      "path": "harness/policies/code-quality-baseline.md",
+      "sha256": "3e2438cfe116c65b0a0c139a3faf03811ba21dc2fc6d77c0d90b0270e94d8c65"
+    },
+    {
+      "path": "harness/policies/data-and-dependencies.md",
+      "sha256": "0b954b33ff172eb0df868cc391176400bfcc4ca495c1b38e931b36269efb6a7a"
+    },
+    {
+      "path": "harness/policies/engineering-standards.md",
+      "sha256": "931b163c12c75de7f6e99620044eb7dec19ceb384000d9b443ae81d8e3f01798"
+    },
+    {
+      "path": "harness/policies/security-and-agent-boundaries.md",
+      "sha256": "e53a1fac767ea841a86cbdfb89b01d6d23fc6ffbeeea1d7c343c281f13772e8a"
+    },
+    {
+      "path": "harness/README.md",
+      "sha256": "2d5598bcbfec91887097f1eb9b958b460c93d889421ac14bf1bb8363a55027f0"
+    },
+    {
+      "path": "harness/rules/global.md",
+      "sha256": "1160b6b2873d3f0aecfa9111f9a3572e5a520c3cf4e2f4a75662f66fbcef24fa"
+    },
+    {
+      "path": "harness/rules/infra.md",
+      "sha256": "56683ae878b812b67164d97517d3f2855d8c0b680d8ef0c4172369be640fab06"
+    },
+    {
+      "path": "harness/rules/registry.yaml",
+      "sha256": "d7cdc32deaaed4a8f6dca8f6108136ca6eb2a3d444cf747cf3603331893a729e"
+    },
+    {
+      "path": "harness/rules/stacks/README.md",
+      "sha256": "07e3c9cbb2eaaed30aadb918b6e5c83935b1b37fab80abcc8f9e52c56c040e55"
+    },
+    {
+      "path": "harness/rules/testing.md",
+      "sha256": "60ac0095320325f5f7b4233206a8c1b88fdb683179d9196d9601755ce7f486a2"
+    },
+    {
+      "path": "harness/scripts/Validate-Harness.ps1",
+      "sha256": "46209702ec6c4ee1cdd350e571f05ebabda75daacd1a66d02c9411ac113095c0"
+    },
+    {
+      "path": "harness/skills/debug.md",
+      "sha256": "646c82e1010a4018c84e0368dd2bd65de8b0d970bdc3894268d4f31b62a90b2b"
+    },
+    {
+      "path": "harness/skills/incident.md",
+      "sha256": "00731db70180abfd06106b9b3a2446f823b56aac3faac410ac0e25e72a4cab96"
+    },
+    {
+      "path": "harness/skills/release.md",
+      "sha256": "0eb96f06823ff000dab70570891ce5790ab25136403d5504adb9d79521914f9d"
+    },
+    {
+      "path": "harness/skills/review.md",
+      "sha256": "bb05a176c7fb33f5efc50bde6aba256fb945d67fa45609ac10db944cf944704d"
+    },
+    {
+      "path": "harness/skills/setup.md",
+      "sha256": "7102123a0abee995193437dc49858273de318da93cb1cfb2207334786d5e53d8"
+    },
+    {
+      "path": "harness/templates/architecture-decision-record.md",
+      "sha256": "55d84c8d8d727cf8ddd0e9882b0ace29d2719322f1ecb235b24c68894b2c5256"
+    },
+    {
+      "path": "harness/templates/bug-tracker.md",
+      "sha256": "83e3e50b04819e5aceac192b7c26d95ef37666faf986d4f247d07f40a45e64c0"
+    },
+    {
+      "path": "harness/templates/design-record.md",
+      "sha256": "44378b3addcc8995e8419b4048ad3939f21de1d1de8c8bdef99f75313a2e56ef"
+    },
+    {
+      "path": "harness/templates/incident-record.md",
+      "sha256": "f8205a1d9db4e6340f415cdd1139db5d82e01cf33a112419b2e17d1f0f248ed6"
+    },
+    {
+      "path": "harness/templates/progress.md",
+      "sha256": "74c47ff4239faa1e669b9628f608b652559bd4f3a5758c6af11034284b816fab"
+    },
+    {
+      "path": "harness/templates/pull-request-record.md",
+      "sha256": "4658f9a4c527f6408e5937deff4439ee79a672d698a92475b812bc286bc038ed"
+    },
+    {
+      "path": "harness/templates/release-record.md",
+      "sha256": "ee30a81e6bbe3ff3b6243850f790e720566f181bcb11a656acbf787da9e4d42e"
+    },
+    {
+      "path": "harness/templates/requirement-record.md",
+      "sha256": "c8af8d89b53c47d7024a5f64bf6ee975225ee39017cd3f0e84854242113da56a"
+    },
+    {
+      "path": "harness/templates/risk-assessment.md",
+      "sha256": "12b89ad26f559052d8d181fdeba03b601da126ae67bbaa7993ef20f880b07792"
+    },
+    {
+      "path": "harness/templates/test-plan.md",
+      "sha256": "6c6421e819764a34bbf45dd4426cb9435adb2c22ec8e5471b842fc85e6a2f530"
+    },
+    {
+      "path": "harness/tests/Test-EnterpriseBaseline.ps1",
+      "sha256": "7bffea3db5e0e0d6bafc249de33b14261de38a951c0d9f3fdce2a6e9a3ebd32f"
+    },
+    {
+      "path": "harness/tests/Test-Harness.ps1",
+      "sha256": "cbb012490e39ff9d583d1fdca8873253868ceec745df24f21a931b2a08abc6e6"
+    },
+    {
+      "path": "harness/workflows/change-delivery.md",
+      "sha256": "a9a781f1d1cab4b013e8ec8fcf0bfbf47c1da3a08b845c8dd63887192b095971"
+    },
+    {
+      "path": "harness/workflows/incident-response.md",
+      "sha256": "b7446f61716333845b99444922cb0b97ae6c7ce41267b6739ed0c5173caac676"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "995ce2aa5bc448a0d5965f8fe2ed384a6ed0ec0b770bfb249ce3c33399bfcff5"
+    },
+    {
+      "path": "package.json",
+      "sha256": "d86b1b092d1c59720b1d67a1ebc05db21b2cf276bd2a2ed7744f43481f3a9d48"
+    },
+    {
+      "path": "scripts/export-public-snapshot.ts",
+      "sha256": "eb81eadb633d1c15325fea5d567fa020895c9f90696d0d143d3f5341ed44c7a1"
+    },
+    {
+      "path": "scripts/Prepare-PublicAcceptance.ps1",
+      "sha256": "7aa97258578646ad0f707a90709dccd7cbcd9f06460e0455e09adb74bcff469d"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "98beb29bd7446449750ea67b5033d343c7f08adaab3af8e71c0f82a10480fa54"
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+version: 1
+routes:
+  - { id: route.default, include: ['**/*'], rules: [TEST-001], gates: [gate.unit-test], approvals: [] }

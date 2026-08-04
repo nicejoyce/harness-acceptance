@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "context", "source_base_revision", "source_revision", "operation", "target_environment", "changed_files", "risk_labels", "route_ids", "approvals", "gates"],
+  "properties": {
+    "version": { "const": 1 },
+    "context": { "type": ["object", "null"], "additionalProperties": false, "required": ["repository", "pull_request", "base_sha", "head_sha"], "properties": { "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" }, "pull_request": { "type": "integer", "minimum": 1 }, "base_sha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" }, "head_sha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" } } },
+    "source_base_revision": { "type": ["string", "null"], "pattern": "^[a-f0-9]{40,64}$" },
+    "source_revision": { "type": ["string", "null"], "pattern": "^[a-f0-9]{40,64}$" },
+    "operation": { "enum": ["change", "merge", "release"] },
+    "target_environment": { "type": "string", "minLength": 1 },
+    "changed_files": { "type": "array", "minItems": 1, "items": { "type": "string" }, "uniqueItems": true },
+    "risk_labels": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "route_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "approvals": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "gates": { "type": "array", "items": { "type": "object", "required": ["id", "severity", "kind", "rule_ids", "depends_on"], "properties": { "id": { "type": "string" }, "severity": { "enum": ["BLOCKER", "REQUIRED", "CONDITIONAL"] }, "kind": { "enum": ["command", "manual-review"] }, "command": { "type": "string" }, "rule_ids": { "type": "array", "items": { "type": "string" } }, "depends_on": { "type": "array", "items": { "type": "string" } }, "exception_id": { "type": "string" } }, "additionalProperties": false } }
+  }
+}

@@ -1,0 +1,21 @@
+version: 2
+severity:
+  BLOCKER: Cannot be waived; stop merge, release, or operation.
+  REQUIRED: Blocks by default; may receive a time-bounded approved exception.
+  CONDITIONAL: Required when its applicability condition is met.
+thresholds:
+  changed_line_coverage_minimum: 80
+  critical_security_coverage_minimum: 90
+  cyclomatic_complexity_maximum: 10
+  nesting_depth_maximum: 3
+  function_lines_maximum: 80
+  file_lines_maximum: 500
+  exception_maximum_days: 30
+blocking:
+  critical_or_high_dependency_vulnerability: BLOCKER
+  required_test_failed_or_skipped: REQUIRED
+  completion_evidence_missing: REQUIRED
+  unapproved_production_or_third_party_side_effect: BLOCKER
+stack_adaptation:
+  - Stack rules may strengthen but must not weaken this baseline.
+  - Project profile binds tools; an unconfigured check must be marked not applicable or use the exception process.

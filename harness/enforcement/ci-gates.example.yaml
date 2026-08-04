@@ -1,0 +1,6 @@
+merge_gates:
+  required: [format, lint, typecheck, unit-test, build, secret-scan, sast, dependency-scan, coverage-report]
+  conditional: [integration-test, e2e, migration-review, privacy-review, container-scan]
+release_gates:
+  required: [merge-gates, artifact-digest, release-record, monitoring-and-rollback-confirmation]
+failure_policy: block unless a valid approved exception exists

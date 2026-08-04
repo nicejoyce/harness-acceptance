@@ -1,0 +1,19 @@
+version: 1
+project:
+  name: python-fixture
+  owner: engineering
+  data_classification: internal
+commands:
+  dependency-setup:
+    executable: python
+    args: [-m, compileall, -q, src]
+    cwd: .
+    timeout_seconds: 30
+  unit-test:
+    executable: python
+    args: [-m, unittest, discover, -s, tests]
+    cwd: .
+    timeout_seconds: 30
+approvals:
+  roles:
+    engineering: [engineering]

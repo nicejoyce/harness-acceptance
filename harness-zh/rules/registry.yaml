@@ -1,0 +1,475 @@
+version: 3
+modules:
+  security_identity:
+    prefix: SEC
+    owner: security
+  data_governance:
+    prefix: DATA
+    owner: data
+  external_boundaries:
+    prefix: BOUND
+    owner: backend
+  domain_architecture:
+    prefix: ARCH
+    owner: architecture
+  api_integration:
+    prefix: API
+    owner: api
+  frontend_experience:
+    prefix: UI
+    owner: frontend
+  quality_engineering:
+    prefix: TEST
+    owner: quality
+  supply_chain:
+    prefix: DEP
+    owner: platform
+  release_operations:
+    prefix: OPS
+    owner: sre
+  documentation_governance:
+    prefix: DOC
+    owner: technical-lead
+  agent_operations:
+    prefix: AI
+    owner: agent-user
+rules:
+  - id: SEC-001
+    module: security_identity
+    severity: BLOCKER
+    gates: &a1
+      - gate.security-scan
+      - gate.peer-review
+    exception_allowed: false
+  - id: SEC-002
+    module: security_identity
+    severity: BLOCKER
+    gates: *a1
+    exception_allowed: false
+  - id: SEC-003
+    module: security_identity
+    severity: BLOCKER
+    gates: *a1
+    exception_allowed: false
+  - id: SEC-004
+    module: security_identity
+    severity: REQUIRED
+    gates: *a1
+    exception_allowed: true
+  - id: SEC-005
+    module: security_identity
+    severity: REQUIRED
+    gates: *a1
+    exception_allowed: true
+  - id: SEC-006
+    module: security_identity
+    severity: REQUIRED
+    gates: *a1
+    exception_allowed: true
+  - id: SEC-007
+    module: security_identity
+    severity: REQUIRED
+    gates: *a1
+    exception_allowed: true
+  - id: SEC-008
+    module: security_identity
+    severity: CONDITIONAL
+    gates: *a1
+    exception_allowed: true
+  - id: DATA-001
+    module: data_governance
+    severity: BLOCKER
+    gates: &a2
+      - gate.security-scan
+      - gate.integration-test
+      - gate.migration-review
+    exception_allowed: false
+  - id: DATA-002
+    module: data_governance
+    severity: BLOCKER
+    gates: *a2
+    exception_allowed: false
+  - id: DATA-003
+    module: data_governance
+    severity: REQUIRED
+    gates: *a2
+    exception_allowed: true
+  - id: DATA-004
+    module: data_governance
+    severity: REQUIRED
+    gates: *a2
+    exception_allowed: true
+  - id: DATA-005
+    module: data_governance
+    severity: BLOCKER
+    gates: *a2
+    exception_allowed: false
+  - id: DATA-006
+    module: data_governance
+    severity: REQUIRED
+    gates: *a2
+    exception_allowed: true
+  - id: DATA-007
+    module: data_governance
+    severity: REQUIRED
+    gates: *a2
+    exception_allowed: true
+  - id: DATA-008
+    module: data_governance
+    severity: CONDITIONAL
+    gates: *a2
+    exception_allowed: true
+  - id: BOUND-001
+    module: external_boundaries
+    severity: REQUIRED
+    gates: &a3
+      - gate.security-scan
+      - gate.integration-test
+      - gate.peer-review
+    exception_allowed: true
+  - id: BOUND-002
+    module: external_boundaries
+    severity: REQUIRED
+    gates: *a3
+    exception_allowed: true
+  - id: BOUND-003
+    module: external_boundaries
+    severity: REQUIRED
+    gates: *a3
+    exception_allowed: true
+  - id: BOUND-004
+    module: external_boundaries
+    severity: REQUIRED
+    gates: *a3
+    exception_allowed: true
+  - id: BOUND-005
+    module: external_boundaries
+    severity: BLOCKER
+    gates: *a3
+    exception_allowed: false
+  - id: BOUND-006
+    module: external_boundaries
+    severity: BLOCKER
+    gates: *a3
+    exception_allowed: false
+  - id: BOUND-007
+    module: external_boundaries
+    severity: REQUIRED
+    gates: *a3
+    exception_allowed: true
+  - id: ARCH-001
+    module: domain_architecture
+    severity: REQUIRED
+    gates: &a4
+      - gate.lint
+      - gate.typecheck
+      - gate.peer-review
+    exception_allowed: true
+  - id: ARCH-002
+    module: domain_architecture
+    severity: REQUIRED
+    gates: *a4
+    exception_allowed: true
+  - id: ARCH-003
+    module: domain_architecture
+    severity: REQUIRED
+    gates: *a4
+    exception_allowed: true
+  - id: ARCH-004
+    module: domain_architecture
+    severity: REQUIRED
+    gates: *a4
+    exception_allowed: true
+  - id: ARCH-005
+    module: domain_architecture
+    severity: REQUIRED
+    gates: *a4
+    exception_allowed: true
+  - id: ARCH-006
+    module: domain_architecture
+    severity: REQUIRED
+    gates: *a4
+    exception_allowed: true
+  - id: ARCH-007
+    module: domain_architecture
+    severity: BLOCKER
+    gates: *a4
+    exception_allowed: false
+  - id: ARCH-008
+    module: domain_architecture
+    severity: REQUIRED
+    gates: *a4
+    exception_allowed: true
+  - id: API-001
+    module: api_integration
+    severity: REQUIRED
+    gates: &a5
+      - gate.integration-test
+      - gate.peer-review
+    exception_allowed: true
+  - id: API-002
+    module: api_integration
+    severity: REQUIRED
+    gates: *a5
+    exception_allowed: true
+  - id: API-003
+    module: api_integration
+    severity: REQUIRED
+    gates: *a5
+    exception_allowed: true
+  - id: API-004
+    module: api_integration
+    severity: REQUIRED
+    gates: *a5
+    exception_allowed: true
+  - id: API-005
+    module: api_integration
+    severity: REQUIRED
+    gates: *a5
+    exception_allowed: true
+  - id: API-006
+    module: api_integration
+    severity: CONDITIONAL
+    gates: *a5
+    exception_allowed: true
+  - id: UI-001
+    module: frontend_experience
+    severity: BLOCKER
+    gates: &a6
+      - gate.e2e-test
+      - gate.peer-review
+    exception_allowed: false
+  - id: UI-002
+    module: frontend_experience
+    severity: REQUIRED
+    gates: *a6
+    exception_allowed: true
+  - id: UI-003
+    module: frontend_experience
+    severity: REQUIRED
+    gates: *a6
+    exception_allowed: true
+  - id: UI-004
+    module: frontend_experience
+    severity: REQUIRED
+    gates: *a6
+    exception_allowed: true
+  - id: UI-005
+    module: frontend_experience
+    severity: REQUIRED
+    gates: *a6
+    exception_allowed: true
+  - id: UI-006
+    module: frontend_experience
+    severity: REQUIRED
+    gates: *a6
+    exception_allowed: true
+  - id: UI-007
+    module: frontend_experience
+    severity: CONDITIONAL
+    gates: *a6
+    exception_allowed: true
+  - id: TEST-001
+    module: quality_engineering
+    severity: REQUIRED
+    gates: &a7
+      - gate.unit-test
+      - gate.peer-review
+    exception_allowed: true
+  - id: TEST-002
+    module: quality_engineering
+    severity: REQUIRED
+    gates: *a7
+    exception_allowed: true
+  - id: TEST-003
+    module: quality_engineering
+    severity: REQUIRED
+    gates: *a7
+    exception_allowed: true
+  - id: TEST-004
+    module: quality_engineering
+    severity: REQUIRED
+    gates: *a7
+    exception_allowed: true
+  - id: TEST-005
+    module: quality_engineering
+    severity: REQUIRED
+    gates: *a7
+    exception_allowed: true
+  - id: TEST-006
+    module: quality_engineering
+    severity: REQUIRED
+    gates: *a7
+    exception_allowed: true
+  - id: TEST-007
+    module: quality_engineering
+    severity: REQUIRED
+    gates: *a7
+    exception_allowed: true
+  - id: TEST-008
+    module: quality_engineering
+    severity: REQUIRED
+    gates: *a7
+    exception_allowed: true
+  - id: TEST-009
+    module: quality_engineering
+    severity: REQUIRED
+    gates: *a7
+    exception_allowed: true
+  - id: DEP-001
+    module: supply_chain
+    severity: REQUIRED
+    gates: &a8
+      - gate.security-scan
+      - gate.build
+      - gate.peer-review
+    exception_allowed: true
+  - id: DEP-002
+    module: supply_chain
+    severity: REQUIRED
+    gates: *a8
+    exception_allowed: true
+  - id: DEP-003
+    module: supply_chain
+    severity: BLOCKER
+    gates: *a8
+    exception_allowed: false
+  - id: DEP-004
+    module: supply_chain
+    severity: REQUIRED
+    gates: *a8
+    exception_allowed: true
+  - id: DEP-005
+    module: supply_chain
+    severity: REQUIRED
+    gates: *a8
+    exception_allowed: true
+  - id: DEP-006
+    module: supply_chain
+    severity: REQUIRED
+    gates: *a8
+    exception_allowed: true
+  - id: DEP-007
+    module: supply_chain
+    severity: REQUIRED
+    gates: *a8
+    exception_allowed: true
+  - id: DEP-008
+    module: supply_chain
+    severity: CONDITIONAL
+    gates: *a8
+    exception_allowed: true
+  - id: OPS-001
+    module: release_operations
+    severity: REQUIRED
+    gates: &a9
+      - gate.build
+      - gate.release-review
+    exception_allowed: true
+  - id: OPS-002
+    module: release_operations
+    severity: REQUIRED
+    gates: *a9
+    exception_allowed: true
+  - id: OPS-003
+    module: release_operations
+    severity: REQUIRED
+    gates: *a9
+    exception_allowed: true
+  - id: OPS-004
+    module: release_operations
+    severity: REQUIRED
+    gates: *a9
+    exception_allowed: true
+  - id: OPS-005
+    module: release_operations
+    severity: REQUIRED
+    gates: *a9
+    exception_allowed: true
+  - id: OPS-006
+    module: release_operations
+    severity: BLOCKER
+    gates: *a9
+    exception_allowed: false
+  - id: OPS-007
+    module: release_operations
+    severity: CONDITIONAL
+    gates: *a9
+    exception_allowed: true
+  - id: DOC-001
+    module: documentation_governance
+    severity: BLOCKER
+    gates: &a10
+      - gate.peer-review
+    exception_allowed: false
+  - id: DOC-002
+    module: documentation_governance
+    severity: REQUIRED
+    gates: *a10
+    exception_allowed: true
+  - id: DOC-003
+    module: documentation_governance
+    severity: REQUIRED
+    gates: *a10
+    exception_allowed: true
+  - id: DOC-004
+    module: documentation_governance
+    severity: REQUIRED
+    gates: *a10
+    exception_allowed: true
+  - id: DOC-005
+    module: documentation_governance
+    severity: REQUIRED
+    gates: *a10
+    exception_allowed: true
+  - id: DOC-006
+    module: documentation_governance
+    severity: REQUIRED
+    gates: *a10
+    exception_allowed: true
+  - id: DOC-007
+    module: documentation_governance
+    severity: REQUIRED
+    gates: *a10
+    exception_allowed: true
+  - id: AI-001
+    module: agent_operations
+    severity: REQUIRED
+    gates: &a11
+      - gate.peer-review
+    exception_allowed: true
+  - id: AI-002
+    module: agent_operations
+    severity: BLOCKER
+    gates: *a11
+    exception_allowed: false
+  - id: AI-003
+    module: agent_operations
+    severity: REQUIRED
+    gates: *a11
+    exception_allowed: true
+  - id: AI-004
+    module: agent_operations
+    severity: BLOCKER
+    gates: *a11
+    exception_allowed: false
+  - id: AI-005
+    module: agent_operations
+    severity: REQUIRED
+    gates: *a11
+    exception_allowed: true
+  - id: AI-006
+    module: agent_operations
+    severity: REQUIRED
+    gates: *a11
+    exception_allowed: true
+  - id: AI-007
+    module: agent_operations
+    severity: REQUIRED
+    gates: *a11
+    exception_allowed: true
+  - id: AI-008
+    module: agent_operations
+    severity: REQUIRED
+    gates: *a11
+    exception_allowed: true

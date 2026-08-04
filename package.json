@@ -1,0 +1,24 @@
+{
+  "name": "enterprise-development-harness",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "test": "node --test harness-cli/test/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "harness": "node harness-cli/src/cli.ts"
+  },
+  "dependencies": {
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "minimatch": "10.0.3",
+    "yaml": "2.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.3.0",
+    "typescript": "5.9.2"
+  }
+}

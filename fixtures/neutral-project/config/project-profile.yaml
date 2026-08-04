@@ -1,0 +1,10 @@
+version: 1
+project:
+  name: neutral-fixture
+  owner: engineering
+  data_classification: internal
+commands:
+  unit-test: { executable: node, args: ['-e', 'console.log("unit ok")'], cwd: ., timeout_seconds: 30 }
+approvals:
+  roles:
+    engineering: [engineering]

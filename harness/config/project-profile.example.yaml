@@ -1,0 +1,20 @@
+# Copy to project-profile.yaml and replace values without changing machine keys.
+version: 1
+project:
+  name: example-project
+  owner: engineering
+  data_classification: internal
+commands:
+  dependency-setup: { executable: project-tool, args: [install, '--locked'], cwd: ., timeout_seconds: 600 }
+  format: { executable: project-tool, args: [format, '--check'], cwd: ., timeout_seconds: 120 }
+  lint: { executable: project-tool, args: [lint], cwd: ., timeout_seconds: 120 }
+  typecheck: { executable: project-tool, args: [typecheck], cwd: ., timeout_seconds: 120 }
+  unit-test: { executable: project-tool, args: [test, unit], cwd: ., timeout_seconds: 600 }
+  integration-test: { executable: project-tool, args: [test, integration], cwd: ., timeout_seconds: 900 }
+  e2e-test: { executable: project-tool, args: [test, e2e], cwd: ., timeout_seconds: 900 }
+  build: { executable: project-tool, args: [build], cwd: ., timeout_seconds: 600 }
+  security-scan: { executable: approved-security-tool, args: [scan], cwd: ., timeout_seconds: 600 }
+approvals:
+  roles:
+    engineering: [github-user-or-team]
+    security: [github-security-reviewer]

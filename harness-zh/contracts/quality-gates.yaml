@@ -1,0 +1,8 @@
+version: 2
+catalog: gate-catalog.yaml
+routes: routes.yaml
+operations:
+  change: [gate.format, gate.lint, gate.typecheck, gate.unit-test, gate.peer-review]
+  merge: [gate.format, gate.lint, gate.typecheck, gate.unit-test, gate.build, gate.security-scan, gate.peer-review]
+  release: [gate.build, gate.security-scan, gate.release-review]
+failure_policy: fail-closed

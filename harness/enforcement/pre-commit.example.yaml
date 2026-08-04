@@ -1,0 +1,7 @@
+stages:
+  pre-commit: [format, lint, secret-scan, changed-file-size-and-complexity]
+  pre-push: [typecheck, unit-test, changed-line-coverage]
+rule_mapping:
+  secret_scan: [SEC-001, SEC-002]
+  injection_scan: [DATA-002, DATA-003, BOUND-005, BOUND-006]
+  quality: [ARCH-005, ARCH-006, TEST-005]
