@@ -57,7 +57,7 @@ test('does not let a partial exception waive other rules sharing the gate', asyn
   const record: ExceptionRecord = {
     id: 'EX-001', rule_ids: ['TEST-001'], gate_ids: ['gate.peer-review'], scope: { paths: ['src/**'] },
     reason: 'Temporary review exception', risk: 'Reduced review', compensating_controls: ['secondary verification'],
-    approver: 'nicejoyce', approval_reference: 'APP-1', created_at: '2026-08-01T00:00:00.000Z',
+    approver: bundle.profile.approvals.roles.engineering[0], approval_reference: 'APP-1', created_at: '2026-08-01T00:00:00.000Z',
     review_at: '2026-08-04T00:00:00.000Z', expires_at: '2026-08-10T00:00:00.000Z', removal_plan: 'Restore peer review',
   };
   const plan = await createPlan(bundle, classification, [record], new Date('2026-08-03T00:00:00.000Z'));
@@ -75,7 +75,7 @@ test('does not except a dependency gate with no directly routed rules', async ()
   const record: ExceptionRecord = {
     id: 'EX-DEPENDENCY', rule_ids: ['UI-002'], gate_ids: ['gate.integration-test'], scope: { paths: ['frontend/**'] },
     reason: 'Temporary integration infrastructure issue', risk: 'Reduced integration coverage', compensating_controls: ['manual verification'],
-    approver: 'nicejoyce', approval_reference: 'APP-2', created_at: '2026-08-01T00:00:00.000Z',
+    approver: bundle.profile.approvals.roles.engineering[0], approval_reference: 'APP-2', created_at: '2026-08-01T00:00:00.000Z',
     review_at: '2026-08-04T00:00:00.000Z', expires_at: '2026-08-10T00:00:00.000Z', removal_plan: 'Restore integration tests',
   };
   const plan = await createPlan(bundle, classification, [record], new Date('2026-08-03T00:00:00.000Z'));

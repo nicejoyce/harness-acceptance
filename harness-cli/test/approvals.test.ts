@@ -29,7 +29,7 @@ function approval(overrides: Partial<ApprovalRecord> = {}): ApprovalRecord {
 
 test('accepts an identity authorized for the claimed role and rejects expired approvals', async () => {
   const bundle = await loadContracts(path.resolve('harness'));
-  const active = approval();
+  const active = approval({ approver: bundle.profile.approvals.roles.engineering[0] });
   assert.deepEqual(await validateApprovals(bundle, [active], context), []);
   const expired = await validateApprovals(bundle, [{ ...active, expires_at: '2026-08-02T00:00:00.000Z' }], context);
   assert.ok(expired.some((item) => item.code === 'APPROVAL_INVALID'));
