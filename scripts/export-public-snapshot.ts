@@ -38,7 +38,7 @@ function inside(parent: string, candidate: string): boolean {
 function allowed(relativePath: string): boolean {
   const segments = relativePath.split('/');
   const basename = segments.at(-1) ?? '';
-  const deniedSegment = segments.some((segment) => ['.git', '.harness', '.superpowers', '.cache', 'node_modules', 'coverage', 'dist', 'evidence', 'logs'].includes(segment.toLowerCase()));
+  const deniedSegment = segments.some((segment) => ['.git', '.harness', '.superpowers', '.cache', '__pycache__', 'node_modules', 'coverage', 'dist', 'evidence', 'logs'].includes(segment.toLowerCase()));
   const deniedFile = basename.toLowerCase().startsWith('.env')
     || /\.(?:log|pem|key|p12|pfx)$/i.test(basename)
     || /\.local(?:\.|$)/i.test(basename)
@@ -48,6 +48,12 @@ function allowed(relativePath: string): boolean {
 
 function sha256(content: Buffer): string {
   return createHash('sha256').update(content).digest('hex');
+}
+
+function canonicalizeText(content: Buffer, relativePath: string): Buffer {
+  const decoded = content.toString('utf8');
+  if (!Buffer.from(decoded, 'utf8').equals(content)) throw new Error(`Public snapshot candidate must be UTF-8 text: ${relativePath}`);
+  return Buffer.from(decoded.replace(/\r\n?/g, '\n'), 'utf8');
 }
 
 function validateReviewerLogin(login: string): void {
@@ -83,7 +89,7 @@ export async function exportPublicSnapshot(options: PublicSnapshotOptions): Prom
     if (!inside(sourceRoot, sourcePath)) throw new Error(`Snapshot path escapes the source repository: ${relativePath}`);
     const metadata = await lstat(sourcePath);
     if (!metadata.isFile() || metadata.isSymbolicLink()) throw new Error(`Snapshot candidate must be a regular file: ${relativePath}`);
-    let content = await readFile(sourcePath);
+    let content = canonicalizeText(await readFile(sourcePath), relativePath);
     let outputs = [{ path: relativePath, content }];
     if (relativePath === 'CODEOWNERS.template') {
       const rendered = content.toString('utf8').replaceAll('{{ACCEPTANCE_REVIEWER_LOGIN}}', options.reviewer_login);

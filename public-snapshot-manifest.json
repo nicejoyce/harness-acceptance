@@ -11,11 +11,15 @@
     },
     {
       "path": "CODEOWNERS",
-      "sha256": "d5e68fcaeb206c80259cb4b1b421ce92f3fb36c4f186864c86d8fa97ed6c33c4"
+      "sha256": "4f5216a85d46d766d0ddf9c4de38c9c044a48f6016d7b18e4206deb363696220"
     },
     {
       "path": "CODEOWNERS.template",
-      "sha256": "597ec8f1a53647a759808979aaac1bd2cc5f3cb69c960fda79f24cfecf17f090"
+      "sha256": "9c2e812ec5c1a9d798f7a8318454b9a0e3551b9ebe123fba78b0e86d49fc4795"
+    },
+    {
+      "path": "docs/acceptance/github-e2e-2026-08-04.md",
+      "sha256": "fa4fcc0d6ea47a2c233139fc382c669dd02bb8f4d64573ca9d7170aa99c6eba3"
     },
     {
       "path": "docs/acceptance/github-e2e-template.md",
@@ -191,7 +195,7 @@
     },
     {
       "path": "harness-cli/test/approvals.test.ts",
-      "sha256": "e1c286cd92551098822818d3d4fc334a3d40705b22d7f61991f3e95a0da215ca"
+      "sha256": "8d0e556794f854bcef57eb29a0bde17319b4e6ad669dcb0b5c8af18441989e99"
     },
     {
       "path": "harness-cli/test/bundle.test.ts",
@@ -239,7 +243,7 @@
     },
     {
       "path": "harness-cli/test/planner.test.ts",
-      "sha256": "ca21b1191b44c4e2aea068fa68057d8ff962e1419b1f43d65513936e22925aa9"
+      "sha256": "703c9b9848ac5fb9d29289e3d5e53257aa9ef84f9117768bdc4e7dc87c1f192f"
     },
     {
       "path": "harness-cli/test/process-tree.test.ts",
@@ -247,7 +251,7 @@
     },
     {
       "path": "harness-cli/test/public-snapshot.test.ts",
-      "sha256": "402beab5a9fbf800581a8fe1ea5664f34bb84b8bc6a5485546179745c21060b5"
+      "sha256": "b7372b1675afb376215d41105bd8e1dc7756473fe3bd82292680278478c225ef"
     },
     {
       "path": "harness-cli/test/python-fixture.test.ts",
@@ -639,7 +643,7 @@
     },
     {
       "path": "scripts/export-public-snapshot.ts",
-      "sha256": "c85bfb5819e899de821460f3c4c955efd5a7f13cc32f59f70388e9cf5fb1107a"
+      "sha256": "220efb3adf5a09ed763473cc10564557ad7e668b69dd177808e539d4741aea47"
     },
     {
       "path": "scripts/Prepare-PublicAcceptance.ps1",

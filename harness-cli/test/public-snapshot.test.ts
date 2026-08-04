@@ -18,10 +18,11 @@ test('exports only allowlisted files with an injected independent CODEOWNER', as
   await mkdir(path.join(source, 'harness-zh/config'), { recursive: true });
   await mkdir(path.join(source, 'harness-cli/src'), { recursive: true });
   await mkdir(path.join(source, 'fixtures/sample'), { recursive: true });
+  await mkdir(path.join(source, 'fixtures/sample/__pycache__'), { recursive: true });
   await mkdir(path.join(source, 'docs/superpowers'), { recursive: true });
   await Promise.all([
     writeFile(path.join(source, '.gitignore'), '.env\nnode_modules/\n'),
-    writeFile(path.join(source, 'package.json'), '{}\n'),
+    writeFile(path.join(source, 'package.json'), '{}\r\n'),
     writeFile(path.join(source, 'CODEOWNERS.template'), '/harness/ @nicejoyce @{{ACCEPTANCE_REVIEWER_LOGIN}}\n'),
     writeFile(path.join(source, '.github/workflows/harness.yml'), 'name: Harness\n'),
     writeFile(path.join(source, 'harness/README.md'), '# Harness\n'),
@@ -33,6 +34,7 @@ test('exports only allowlisted files with an injected independent CODEOWNER', as
     writeFile(path.join(source, 'harness/config.local.json'), '{"local":true}\n'),
     writeFile(path.join(source, 'harness-cli/src/index.ts'), 'export {};\n'),
     writeFile(path.join(source, 'fixtures/sample/input.txt'), 'fixture\n'),
+    writeFile(path.join(source, 'fixtures/sample/__pycache__/module.pyc'), Buffer.from([0, 1, 2, 3])),
     writeFile(path.join(source, 'docs/superpowers/private.md'), 'private plan\n'),
     writeFile(path.join(source, '.env'), 'TOKEN=secret\n'),
   ]);
@@ -45,6 +47,7 @@ test('exports only allowlisted files with an injected independent CODEOWNER', as
   assert.ok(result.files.includes('fixtures/sample/input.txt'), 'untracked allowlisted fixtures are exported');
   assert.equal(await readFile(path.join(output, 'CODEOWNERS'), 'utf8'), '/harness/ @nicejoyce @independent-reviewer\n');
   assert.equal(await readFile(path.join(output, 'CODEOWNERS.template'), 'utf8'), '/harness/ @nicejoyce @{{ACCEPTANCE_REVIEWER_LOGIN}}\n');
+  assert.equal(await readFile(path.join(output, 'package.json'), 'utf8'), '{}\n');
   assert.equal(await readFile(path.join(output, 'harness/README.md'), 'utf8'), '# Harness\n');
   for (const root of ['harness', 'harness-zh']) {
     const profile = YAML.parse(await readFile(path.join(output, root, 'config/project-profile.yaml'), 'utf8')) as { approvals: { roles: Record<string, string[]> } };
@@ -56,6 +59,7 @@ test('exports only allowlisted files with an injected independent CODEOWNER', as
   await assert.rejects(readFile(path.join(output, 'harness/.harness/manifest.json'), 'utf8'));
   await assert.rejects(readFile(path.join(output, 'harness/private.pem'), 'utf8'));
   await assert.rejects(readFile(path.join(output, 'harness/config.local.json'), 'utf8'));
+  await assert.rejects(readFile(path.join(output, 'fixtures/sample/__pycache__/module.pyc')));
   const manifest = JSON.parse(await readFile(path.join(output, 'public-snapshot-manifest.json'), 'utf8')) as { files: Array<{ path: string; sha256: string }> };
   assert.ok(manifest.files.every((item) => /^[a-f0-9]{64}$/.test(item.sha256)));
 });
