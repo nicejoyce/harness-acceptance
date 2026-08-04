@@ -3,7 +3,7 @@
   "files": [
     {
       "path": ".github/workflows/harness.yml",
-      "sha256": "a2f07512a53bd0007cb531e2cf62701faecea8e8985928610b81c5fd4fa3345d"
+      "sha256": "ebc0677de2ac82d04a0b9794dc2bc330a9c0816e3165d01018b04d1c05a27602"
     },
     {
       "path": ".gitignore",
@@ -199,7 +199,7 @@
     },
     {
       "path": "harness-cli/test/compatibility.test.ts",
-      "sha256": "aa658733faaabaeb6a743ce14c3b84715f18a43c444c1e80bb8bdaa10d131324"
+      "sha256": "72a85ae3ea87285f69ef015edecd2789c5ef3cb5d9abd8b9909e9c8bcd2b4689"
     },
     {
       "path": "harness-cli/test/contracts.test.ts",
@@ -239,7 +239,7 @@
     },
     {
       "path": "harness-cli/test/public-snapshot.test.ts",
-      "sha256": "ec92c0c09abe1e8dcb9bf54bdf0cd87cfbad9608d28925db5060f90553fe4aa3"
+      "sha256": "a084f2b961f4011ae645f863811e5916e3820d5613ed47766969787f8c320d63"
     },
     {
       "path": "harness-cli/test/python-fixture.test.ts",
@@ -267,7 +267,7 @@
     },
     {
       "path": "harness-zh/config/project-profile.yaml",
-      "sha256": "6a99df8495e405842cfc1adb53f5c5a775664283ff5d6075bf30142976020548"
+      "sha256": "4919685e72985f376909efbd5ff4dd21011b3a30367d70ec5dfb193ca86f7993"
     },
     {
       "path": "harness-zh/contracts/gate-catalog.yaml",
@@ -447,7 +447,7 @@
     },
     {
       "path": "harness/config/project-profile.yaml",
-      "sha256": "6a99df8495e405842cfc1adb53f5c5a775664283ff5d6075bf30142976020548"
+      "sha256": "4919685e72985f376909efbd5ff4dd21011b3a30367d70ec5dfb193ca86f7993"
     },
     {
       "path": "harness/contracts/gate-catalog.yaml",
@@ -631,7 +631,7 @@
     },
     {
       "path": "scripts/export-public-snapshot.ts",
-      "sha256": "eb81eadb633d1c15325fea5d567fa020895c9f90696d0d143d3f5341ed44c7a1"
+      "sha256": "053f5c4b65a869a0f74cf660852aefeb1f78b9a0fb47ebe65fe9d896f60676d0"
     },
     {
       "path": "scripts/Prepare-PublicAcceptance.ps1",

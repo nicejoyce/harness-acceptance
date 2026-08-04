@@ -4,21 +4,82 @@ project:
   owner: engineering
   data_classification: internal
 commands:
-  dependency-setup: { executable: npm, args: [ci, '--ignore-scripts'], cwd: ., timeout_seconds: 300 }
-  format: { executable: node, args: ['--check', 'harness-cli/src/contracts.ts'], cwd: ., timeout_seconds: 60 }
-  lint: { executable: npm, args: [run, typecheck], cwd: ., timeout_seconds: 120 }
-  typecheck: { executable: npm, args: [run, typecheck], cwd: ., timeout_seconds: 120 }
-  unit-test: { executable: npm, args: [test], cwd: ., timeout_seconds: 300 }
-  integration-test: { executable: node, args: ['--test', 'harness-cli/test/workflow.test.ts'], cwd: ., timeout_seconds: 300 }
-  e2e-test: { executable: node, args: ['--test', 'harness-cli/test/workflow.test.ts'], cwd: ., timeout_seconds: 300 }
-  build: { executable: npm, args: [run, typecheck], cwd: ., timeout_seconds: 120 }
-  security-scan: { executable: npm, args: [audit, '--offline', '--audit-level=high'], cwd: ., timeout_seconds: 120 }
+  dependency-setup:
+    executable: npm
+    args:
+      - ci
+      - --ignore-scripts
+    cwd: .
+    timeout_seconds: 300
+  format:
+    executable: node
+    args:
+      - --check
+      - harness-cli/src/contracts.ts
+    cwd: .
+    timeout_seconds: 60
+  lint:
+    executable: npm
+    args:
+      - run
+      - typecheck
+    cwd: .
+    timeout_seconds: 120
+  typecheck:
+    executable: npm
+    args:
+      - run
+      - typecheck
+    cwd: .
+    timeout_seconds: 120
+  unit-test:
+    executable: npm
+    args:
+      - test
+    cwd: .
+    timeout_seconds: 300
+  integration-test:
+    executable: node
+    args:
+      - --test
+      - harness-cli/test/workflow.test.ts
+    cwd: .
+    timeout_seconds: 300
+  e2e-test:
+    executable: node
+    args:
+      - --test
+      - harness-cli/test/workflow.test.ts
+    cwd: .
+    timeout_seconds: 300
+  build:
+    executable: npm
+    args:
+      - run
+      - typecheck
+    cwd: .
+    timeout_seconds: 120
+  security-scan:
+    executable: npm
+    args:
+      - audit
+      - --offline
+      - --audit-level=high
+    cwd: .
+    timeout_seconds: 120
 approvals:
   roles:
-    engineering: [nicejoyce]
-    security: [nicejoyce]
-    data: [nicejoyce]
-    api: [nicejoyce]
-    frontend: [nicejoyce]
-    platform: [nicejoyce]
-    sre: [nicejoyce]
+    engineering:
+      - Miziky2000-netizen
+    security:
+      - Miziky2000-netizen
+    data:
+      - Miziky2000-netizen
+    api:
+      - Miziky2000-netizen
+    frontend:
+      - Miziky2000-netizen
+    platform:
+      - Miziky2000-netizen
+    sre:
+      - Miziky2000-netizen

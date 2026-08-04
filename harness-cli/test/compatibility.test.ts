@@ -33,13 +33,17 @@ test('canonical distributions prepare project dependencies through a declared se
 });
 
 test('canonical GitHub approval roles use the configured reviewer login instead of role placeholders', async () => {
+  const configuredReviewers = new Set<string>();
   for (const root of ['harness', 'harness-zh']) {
     const bundle = await loadContracts(root);
     for (const [role, identities] of Object.entries(bundle.profile.approvals.roles)) {
       assert.equal(identities.includes(role), false, `${role} still contains a role-name placeholder`);
-      assert.deepEqual(identities, ['nicejoyce']);
+      assert.equal(identities.length, 1, `${role} must have exactly one acceptance reviewer`);
+      assert.match(identities[0], /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/);
+      configuredReviewers.add(identities[0].toLowerCase());
     }
   }
+  assert.equal(configuredReviewers.size, 1, 'English and Chinese profiles must use the same acceptance reviewer');
 });
 
 test('GitHub Actions isolates project commands and publishes a trusted signed final check', async () => {
@@ -54,6 +58,8 @@ test('GitHub Actions isolates project commands and publishes a trusted signed fi
   assert.doesNotMatch(workflow, /attest-build-provenance/);
   assert.doesNotMatch(workflow, /attestations:\s*write/);
   assert.doesNotMatch(workflow, /id-token:\s*write/);
+  assert.doesNotMatch(workflow, /gh api --paginate --slurp --jq/);
+  assert.equal(workflow.match(/gh api --paginate [^\n]+ \| jq -s 'add'/g)?.length, 2);
   assert.match(workflow, /prepare-context:/);
   assert.match(workflow, /harness-final:/);
   assert.match(workflow, /download-artifact@v4/);
