@@ -50,7 +50,7 @@ jobs:
           mkdir -p prepared
           node trusted-harness/harness-cli/src/cli.ts validate --root trusted-harness/harness
           node trusted-harness/harness-cli/src/cli.ts plan --root trusted-harness/harness --project-root project --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --git-base "$BASE_SHA" --git-head "$HEAD_SHA" --operation merge --environment test --risk-labels-json "$PR_LABELS_JSON" --output prepared/plan.json
-          gh api --paginate --slurp --jq add "repos/$GH_REPOSITORY/pulls/$PR_NUMBER/reviews" > prepared/reviews.json
+          gh api --paginate "repos/$GH_REPOSITORY/pulls/$PR_NUMBER/reviews" | jq -s 'add' > prepared/reviews.json
           node trusted-harness/harness-cli/src/cli.ts approvals github --root trusted-harness/harness --project-root project --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --plan prepared/plan.json --reviews prepared/reviews.json --output prepared/approvals.json
           git -C project bundle create ../prepared/project.bundle "$BASE_SHA" "$HEAD_SHA"
       - name: Upload trusted execution inputs
@@ -163,7 +163,7 @@ jobs:
           HARNESS_ED25519_PUBLIC_KEYS_JSON: ${{ vars.HARNESS_ED25519_PUBLIC_KEYS_JSON }}
           HARNESS_ED25519_PUBLIC_KEY_B64: ${{ vars.HARNESS_ED25519_PUBLIC_KEY_B64 }}
         run: |
-          gh api --paginate --slurp --jq add "repos/$GH_REPOSITORY/pulls/$PR_NUMBER/reviews" > current-reviews.json
+          gh api --paginate "repos/$GH_REPOSITORY/pulls/$PR_NUMBER/reviews" | jq -s 'add' > current-reviews.json
           node trusted-harness/harness-cli/src/cli.ts approvals github --root trusted-harness/harness --project-root project --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --plan trusted-inputs/prepared/plan.json --reviews current-reviews.json --output expected-approvals.json
           MANIFEST_ARGS=()
           while IFS= read -r manifest; do MANIFEST_ARGS+=(--manifest "$manifest"); done < <(find evidence -name manifest.json -type f -print | sort)

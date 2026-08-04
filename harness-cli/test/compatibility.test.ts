@@ -58,6 +58,8 @@ test('GitHub Actions isolates project commands and publishes a trusted signed fi
   assert.doesNotMatch(workflow, /attest-build-provenance/);
   assert.doesNotMatch(workflow, /attestations:\s*write/);
   assert.doesNotMatch(workflow, /id-token:\s*write/);
+  assert.doesNotMatch(workflow, /gh api --paginate --slurp --jq/);
+  assert.equal(workflow.match(/gh api --paginate [^\n]+ \| jq -s 'add'/g)?.length, 2);
   assert.match(workflow, /prepare-context:/);
   assert.match(workflow, /harness-final:/);
   assert.match(workflow, /download-artifact@v4/);
