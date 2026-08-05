@@ -6,7 +6,7 @@ import { loadContracts } from './contracts.ts';
 import type { Diagnostic, ValidationResult } from './diagnostics.ts';
 import { contractsDigest, sha256, stableJson } from './hash.ts';
 import { verifyPlan } from './planner.ts';
-import { assertGitPlanContext, gitRepositoryRoot } from './git.ts';
+import { assertGitPlanContext, gitRepositoryRoot, pathsReferToSameLocation } from './git.ts';
 import { executionContextsEqual, validateExecutionContext } from './context.ts';
 import { schemaErrorMessages, schemaValidator } from './schema.ts';
 import type { ApprovalRecord, EvidenceManifest, ExceptionRecord, ExecutionContext, ExecutionPlan } from './types.ts';
@@ -110,7 +110,7 @@ export async function verifyEvidence(contractRoot: string, manifestPath: string,
       if (plan.source_revision || plan.source_base_revision) {
         if (!plan.source_revision || !plan.source_base_revision) throw new Error('Git-bound evidence requires both source revisions');
         const gitRoot = await gitRepositoryRoot(projectRoot);
-        if (gitRoot !== path.resolve(projectRoot)) throw new Error('Project root must be the Git repository root');
+        if (!await pathsReferToSameLocation(gitRoot, projectRoot)) throw new Error('Project root must be the Git repository root');
         await assertGitPlanContext(gitRoot, plan.source_base_revision, plan.source_revision, plan.changed_files);
       } else {
         try {

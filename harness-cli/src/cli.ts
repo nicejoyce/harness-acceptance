@@ -9,7 +9,7 @@ import { ExitCode, exitCodeForManifest } from './exit-codes.ts';
 import { createPlan, PlanningError, verifyPlan } from './planner.ts';
 import { runPlan } from './runner.ts';
 import { schemaErrorMessages, schemaValidator } from './schema.ts';
-import { assertGitPlanContext, changedFilesFromGit, GitPlanContextError, gitRepositoryRoot, resolveGitRevision } from './git.ts';
+import { assertGitPlanContext, changedFilesFromGit, GitPlanContextError, gitRepositoryRoot, pathsReferToSameLocation, resolveGitRevision } from './git.ts';
 import { executionContextFromParts, executionContextsEqual } from './context.ts';
 import { createGitHubApprovals, type GitHubReview } from './github-approvals.ts';
 import { aggregateTrustedEvidence, type GitHubJobConclusion } from './aggregate.ts';
@@ -121,7 +121,7 @@ async function main(args: string[]): Promise<number> {
       const gitHead = value(args, '--git-head', 'HEAD');
       if (context && (!gitBase || values(args, '--git-head').length === 0)) throw new PlanningError('GitHub execution context requires --git-base and --git-head');
       const gitRoot = gitBase ? await gitRepositoryRoot(projectRoot) : undefined;
-      if (gitRoot && gitRoot !== projectRoot) throw new PlanningError('--project-root must be the Git repository root');
+      if (gitRoot && !await pathsReferToSameLocation(gitRoot, projectRoot)) throw new PlanningError('--project-root must be the Git repository root');
       const changedFiles = gitBase ? await changedFilesFromGit(gitRoot!, gitBase, gitHead) : values(args, '--changed-file');
       if (changedFiles.length === 0) throw new PlanningError('No changed files were provided or detected');
       const classification = classifyChanges(bundle, {
@@ -156,7 +156,7 @@ async function main(args: string[]): Promise<number> {
       if ((plan as ExecutionPlan).source_revision || (plan as ExecutionPlan).source_base_revision) {
         if (!(plan as ExecutionPlan).source_revision || !(plan as ExecutionPlan).source_base_revision) throw new PlanningError('Git-bound plans require both source revisions');
         const gitRoot = await gitRepositoryRoot(projectRoot);
-        if (gitRoot !== projectRoot) throw new PlanningError('--project-root must be the Git repository root');
+        if (!await pathsReferToSameLocation(gitRoot, projectRoot)) throw new PlanningError('--project-root must be the Git repository root');
         await assertGitPlanContext(gitRoot, (plan as ExecutionPlan).source_base_revision!, (plan as ExecutionPlan).source_revision!, (plan as ExecutionPlan).changed_files);
       } else {
         try {
@@ -184,7 +184,7 @@ async function main(args: string[]): Promise<number> {
       if (!validatePlan(plan)) throw new PlanningError(schemaErrorMessages(validatePlan.errors).join('; '));
       await verifyPlan(bundle, plan as ExecutionPlan, []);
       const gitRoot = await gitRepositoryRoot(projectRoot);
-      if (gitRoot !== projectRoot) throw new PlanningError('--project-root must be the Git repository root');
+      if (!await pathsReferToSameLocation(gitRoot, projectRoot)) throw new PlanningError('--project-root must be the Git repository root');
       if (!(plan as ExecutionPlan).source_base_revision || !(plan as ExecutionPlan).source_revision) throw new PlanningError('GitHub approvals require a Git-bound plan');
       if (!executionContextsEqual((plan as ExecutionPlan).context, context)) throw new PlanningError('GitHub approvals context does not match the plan');
       await assertGitPlanContext(gitRoot, (plan as ExecutionPlan).source_base_revision!, (plan as ExecutionPlan).source_revision!, (plan as ExecutionPlan).changed_files);

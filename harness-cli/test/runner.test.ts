@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -188,7 +188,7 @@ test('binds evidence to the containing Git repository when Harness is nested', a
   fixture.bundle.root = nestedRoot;
   const plan = await bindFixtureToGit(fixture);
   const manifest = await runPlan(fixture.bundle, plan, { output_dir: path.join(fixture.root, 'nested-evidence') });
-  assert.equal(manifest.repository_root, path.resolve(fixture.root));
+  assert.equal(manifest.repository_root, await realpath(fixture.root));
 });
 
 test('executes npm descriptors on Windows without enabling arbitrary shell commands', { skip: process.platform !== 'win32' }, async () => {
