@@ -96,6 +96,53 @@ function semanticDiagnostics(bundle: ContractBundle): Diagnostic[] {
       if (!gateIds.has(gateId)) diagnostics.push({ code: 'UNKNOWN_GATE', document: documents.registry.relativePath, path: `/rules/${rule.id}/gates`, message: `Unknown gate: ${gateId}` });
     }
   }
+  if (bundle.registry.version === 4) {
+    if (bundle.gates.version !== 2) {
+      diagnostics.push({ code: 'ENFORCEMENT_INVALID', document: documents.gates.relativePath, path: '/version', message: 'Rule registry v4 requires gate catalog v2' });
+    }
+
+    for (const rule of bundle.registry.rules) {
+      if (rule.severity === 'BLOCKER' && rule.enforcement.mode === 'advisory') {
+        diagnostics.push({ code: 'ENFORCEMENT_INVALID', document: documents.registry.relativePath, path: `/rules/${rule.id}/enforcement`, message: `BLOCKER rule ${rule.id} cannot be advisory` });
+      }
+      if (rule.enforcement.mode === 'advisory' && rule.gates.length > 0) {
+        diagnostics.push({ code: 'ENFORCEMENT_INVALID', document: documents.registry.relativePath, path: `/rules/${rule.id}/gates`, message: `Advisory rule ${rule.id} cannot select blocking gates` });
+      }
+      if (rule.enforcement.mode !== 'machine-enforced') continue;
+
+      for (const verifierGateId of rule.enforcement.verifier_gate_ids) {
+        const verifierGate = bundle.gates.gates.find((gate) => gate.id === verifierGateId);
+        if (!verifierGate) continue;
+        if (!rule.gates.includes(verifierGateId)) {
+          diagnostics.push({ code: 'ENFORCEMENT_INVALID', document: documents.registry.relativePath, path: `/rules/${rule.id}/enforcement/verifier_gate_ids`, message: `Machine-enforced rule ${rule.id} must select verifier gate ${verifierGateId}` });
+        }
+        if (verifierGate.kind !== 'command') {
+          diagnostics.push({ code: 'ENFORCEMENT_INVALID', document: documents.gates.relativePath, path: `/gates/${verifierGateId}/kind`, message: `Machine verifier ${verifierGateId} must be a command gate` });
+        }
+        if (verifierGate.verification?.scope !== 'rule-specific') {
+          diagnostics.push({ code: 'ENFORCEMENT_INVALID', document: documents.gates.relativePath, path: `/gates/${verifierGateId}/verification`, message: `Machine verifier ${verifierGateId} must declare rule-specific verification metadata` });
+        } else if (!verifierGate.verification.rule_ids.includes(rule.id)) {
+          diagnostics.push({ code: 'ENFORCEMENT_INVALID', document: documents.gates.relativePath, path: `/gates/${verifierGateId}/verification/rule_ids`, message: `Machine verifier ${verifierGateId} does not declare rule ${rule.id}` });
+        }
+      }
+    }
+
+    if (bundle.gates.version === 2) {
+      diagnostics.push(...duplicateDiagnostics(bundle.gates.gates.flatMap((gate) => gate.verification?.verifier_id ?? []), documents.gates.relativePath, 'verifier'));
+      for (const gate of bundle.gates.gates) {
+        for (const ruleId of gate.verification?.rule_ids ?? []) {
+          const rule = bundle.registry.rules.find((candidate) => candidate.id === ruleId);
+          if (!rule) {
+            diagnostics.push({ code: 'UNKNOWN_RULE', document: documents.gates.relativePath, path: `/gates/${gate.id}/verification/rule_ids`, message: `Unknown rule: ${ruleId}` });
+            continue;
+          }
+          if (rule.enforcement.mode !== 'machine-enforced' || !rule.enforcement.verifier_gate_ids.includes(gate.id)) {
+            diagnostics.push({ code: 'ENFORCEMENT_INVALID', document: documents.gates.relativePath, path: `/gates/${gate.id}/verification/rule_ids`, message: `Verifier ${gate.id} is not referenced by rule ${ruleId}` });
+          }
+        }
+      }
+    }
+  }
   for (const route of bundle.routes.routes) {
     for (const ruleId of route.rules) {
       if (!ruleIds.has(ruleId)) diagnostics.push({ code: 'UNKNOWN_RULE', document: documents.routes.relativePath, path: `/routes/${route.id}/rules`, message: `Unknown rule: ${ruleId}` });

@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "rules"],
+  "properties": {
+    "version": { "const": 1 },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          { "$ref": "#/definitions/machineRule" },
+          { "$ref": "#/definitions/humanRule" },
+          { "$ref": "#/definitions/advisoryRule" }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "baseProperties": {
+      "id": { "type": "string", "pattern": "^[A-Z]+-[0-9]{3}$" },
+      "mode": { "enum": ["machine-enforced", "human-attested", "advisory"] },
+      "evidence_type": { "type": "string", "minLength": 1 },
+      "owner": { "type": "string", "minLength": 1 },
+      "implementation_status": { "enum": ["implemented", "planned", "unverifiable"] },
+      "known_gap": { "type": ["string", "null"] }
+    },
+    "machineRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mode", "verifier_gate_ids", "evidence_type", "owner", "implementation_status", "known_gap"],
+      "properties": {
+        "id": { "$ref": "#/definitions/baseProperties/id" },
+        "mode": { "const": "machine-enforced" },
+        "verifier_gate_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^gate\\.[a-z0-9][a-z0-9.-]*$" },
+          "uniqueItems": true
+        },
+        "evidence_type": { "$ref": "#/definitions/baseProperties/evidence_type" },
+        "owner": { "$ref": "#/definitions/baseProperties/owner" },
+        "implementation_status": { "const": "implemented" },
+        "known_gap": { "type": "null" }
+      }
+    },
+    "humanRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mode", "attestation_policy_id", "evidence_type", "owner", "implementation_status", "known_gap"],
+      "properties": {
+        "id": { "$ref": "#/definitions/baseProperties/id" },
+        "mode": { "const": "human-attested" },
+        "attestation_policy_id": { "type": "string", "pattern": "^attestation\\.[a-z0-9][a-z0-9.-]*$" },
+        "evidence_type": { "$ref": "#/definitions/baseProperties/evidence_type" },
+        "owner": { "$ref": "#/definitions/baseProperties/owner" },
+        "implementation_status": { "enum": ["implemented", "planned"] },
+        "known_gap": { "$ref": "#/definitions/baseProperties/known_gap" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "implementation_status": { "const": "planned" } } },
+          "then": { "properties": { "known_gap": { "type": "string", "minLength": 1 } } },
+          "else": { "properties": { "known_gap": { "type": "null" } } }
+        }
+      ]
+    },
+    "advisoryRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mode", "evidence_type", "owner", "implementation_status", "known_gap"],
+      "properties": {
+        "id": { "$ref": "#/definitions/baseProperties/id" },
+        "mode": { "const": "advisory" },
+        "evidence_type": { "$ref": "#/definitions/baseProperties/evidence_type" },
+        "owner": { "$ref": "#/definitions/baseProperties/owner" },
+        "implementation_status": { "const": "unverifiable" },
+        "known_gap": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

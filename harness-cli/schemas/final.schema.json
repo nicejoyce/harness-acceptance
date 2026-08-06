@@ -11,7 +11,7 @@
     "payload": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["version", "context", "generated_at", "check_name", "job_conclusion", "plan_sha256", "evidence", "result"],
+      "required": ["version", "context", "generated_at", "check_name", "job_conclusion", "plan_sha256", "expected_platforms", "execution_platforms", "platform_reason_codes", "fallback_full_matrix", "platform_mode", "evidence", "approvals", "thresholds", "result"],
       "properties": {
         "version": { "const": 1 },
         "context": { "type": ["object", "null"], "additionalProperties": false, "required": ["repository", "pull_request", "base_sha", "head_sha"], "properties": { "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" }, "pull_request": { "type": "integer", "minimum": 1 }, "base_sha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" }, "head_sha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" } } },
@@ -19,7 +19,14 @@
         "check_name": { "const": "harness-final" },
         "job_conclusion": { "enum": ["success", "failure", "cancelled", "skipped"] },
         "plan_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "expected_platforms": { "type": "array", "minItems": 1, "items": { "enum": ["linux", "win32", "darwin"] }, "uniqueItems": true },
+        "execution_platforms": { "type": "array", "minItems": 1, "items": { "enum": ["linux", "win32", "darwin"] }, "uniqueItems": true },
+        "platform_reason_codes": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "fallback_full_matrix": { "type": "boolean" },
+        "platform_mode": { "enum": ["shadow", "enforce", "fallback"] },
         "evidence": { "type": "array", "minItems": 1, "items": { "type": "object", "additionalProperties": false, "required": ["platform", "manifest_sha256", "result"], "properties": { "platform": { "type": "string", "minLength": 1 }, "manifest_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "result": { "enum": ["passed", "failed"] } } } },
+        "approvals": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["id", "role", "approver", "approval_reference", "review_id"], "properties": { "id": { "type": "string", "minLength": 1 }, "role": { "type": "string", "minLength": 1 }, "approver": { "type": "string", "minLength": 1 }, "approval_reference": { "type": "string", "minLength": 1 }, "review_id": { "type": "integer", "minimum": 1 } } } },
+        "thresholds": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["id", "value"], "properties": { "id": { "type": "string", "minLength": 1 }, "value": { "type": "number" } } } },
         "result": { "enum": ["passed", "failed"] }
       }
     }

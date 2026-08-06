@@ -17,6 +17,7 @@ test('orders dependencies before their dependent gates', async () => {
   });
   const plan = await createPlan(bundle, classification, []);
   assert.equal(plan.source_revision, null);
+  assert.deepEqual(plan.rule_ids, classification.rule_ids);
   const ids = plan.gates.map((gate) => gate.id);
   assert.ok(ids.indexOf('gate.unit-test') < ids.indexOf('gate.integration-test'));
   assert.ok(ids.indexOf('gate.integration-test') < ids.indexOf('gate.e2e-test'));
@@ -80,4 +81,15 @@ test('does not except a dependency gate with no directly routed rules', async ()
   };
   const plan = await createPlan(bundle, classification, [record], new Date('2026-08-03T00:00:00.000Z'));
   assert.equal(plan.gates.find((gate) => gate.id === 'gate.integration-test')?.exception_id, undefined);
+});
+
+test('fast lane selects only bounded feedback gates', async () => {
+  const bundle = await loadContracts(path.resolve('harness'));
+  const classification = classifyChanges(bundle, { changed_files: ['src/feature.ts'], operation: 'change', target_environment: 'test' });
+  const plan = await createPlan(bundle, classification, [], new Date(), null, null, null, 'fast');
+  assert.equal(plan.lane, 'fast');
+  assert.ok(plan.gates.some((gate) => gate.id === 'gate.unit-test'));
+  assert.ok(!plan.gates.some((gate) => gate.id === 'gate.build'));
+  assert.ok(!plan.gates.some((gate) => gate.id === 'gate.changed-line-coverage'));
+  assert.ok(!plan.gates.some((gate) => gate.id === 'gate.incremental-mutation'));
 });

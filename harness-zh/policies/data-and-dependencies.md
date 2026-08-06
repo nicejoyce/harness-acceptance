@@ -9,6 +9,9 @@
 
 ## 依赖
 
+- 使用已批准 registry、禁用 install scripts、不增加原生模块和网络能力，重复安装已审核且未改变的 lockfile 属于预授权操作，不等同于改变依赖图。
+- Manifest、lockfile、registry、install scripts、原生模块或网络能力任一变化都属于特权依赖变更，必须审批。
+- 必须提供 lockfile 完整性、license、SBOM、漏洞扫描和 install-script 扫描证据；缺失或未知证据一律 fail closed。
 - 只引入来源已批准、版本固定且有明确理由的依赖。
 - 添加运行时依赖前审查许可证、维护状况、漏洞风险、传递影响和替代方案。
 - Manifest 和 lockfile 只能通过批准的包管理器更新。

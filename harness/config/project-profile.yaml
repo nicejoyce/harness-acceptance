@@ -33,8 +33,13 @@ commands:
     cwd: .
     timeout_seconds: 120
   unit-test:
-    executable: npm
+    executable: npx
     args:
+      - --no-install
+      - c8
+      - --reporter=json
+      - --report-dir=coverage
+      - npm
       - test
     cwd: .
     timeout_seconds: 300
@@ -67,6 +72,69 @@ commands:
       - --audit-level=high
     cwd: .
     timeout_seconds: 120
+  control-plane-integrity:
+    executable: node
+    args:
+      - harness-cli/src/cli.ts
+      - control-plane
+      - verify
+      - --baseline-root
+      - .
+      - --candidate-root
+      - ../project
+      - --json
+    cwd: .
+    execution_root: trusted-harness
+    timeout_seconds: 120
+  changed-line-coverage:
+    executable: node
+    args:
+      - harness-cli/src/cli.ts
+      - coverage
+      - verify
+      - --project-root
+      - ../project
+      - --base-env
+      - BASE_SHA
+      - --head-env
+      - HEAD_SHA
+      - --report
+      - ../project/coverage/coverage-final.json
+      - --json
+    cwd: .
+    execution_root: trusted-harness
+    timeout_seconds: 120
+    inherited_environment:
+      - BASE_SHA
+      - HEAD_SHA
+  regression-proof:
+    executable: node
+    args:
+      - harness-cli/src/cli.ts
+      - regression-proof
+      - verify
+      - --root
+      - .
+      - --project-root
+      - ../project
+      - --base-env
+      - BASE_SHA
+      - --head-env
+      - HEAD_SHA
+      - --json
+    cwd: .
+    execution_root: trusted-harness
+    timeout_seconds: 600
+    inherited_environment:
+      - BASE_SHA
+      - HEAD_SHA
+  mutation-smoke:
+    executable: npm
+    args:
+      - run
+      - mutation:smoke
+    cwd: .
+    timeout_seconds: 1800
 approvals:
   roles:
     engineering:

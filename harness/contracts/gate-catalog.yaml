@@ -1,15 +1,145 @@
-version: 1
+version: 2
 gates:
-  - { id: gate.setup, severity: REQUIRED, kind: command, command: dependency-setup, evidence: command-output, owner: platform, exception_allowed: true }
-  - { id: gate.format, severity: REQUIRED, kind: command, command: format, evidence: command-output, owner: quality, exception_allowed: true, depends_on: [gate.setup] }
-  - { id: gate.lint, severity: REQUIRED, kind: command, command: lint, evidence: command-output, owner: quality, exception_allowed: true, depends_on: [gate.setup] }
-  - { id: gate.typecheck, severity: REQUIRED, kind: command, command: typecheck, evidence: command-output, owner: quality, exception_allowed: true, depends_on: [gate.setup] }
-  - { id: gate.unit-test, severity: REQUIRED, kind: command, command: unit-test, evidence: test-report, owner: quality, exception_allowed: true, depends_on: [gate.setup] }
-  - { id: gate.integration-test, severity: CONDITIONAL, kind: command, command: integration-test, evidence: integration-log, owner: quality, exception_allowed: true, depends_on: [gate.unit-test] }
-  - { id: gate.e2e-test, severity: CONDITIONAL, kind: command, command: e2e-test, evidence: e2e-artifact, owner: quality, exception_allowed: true, depends_on: [gate.integration-test] }
-  - { id: gate.build, severity: REQUIRED, kind: command, command: build, evidence: build-report, owner: platform, exception_allowed: true, depends_on: [gate.typecheck, gate.unit-test] }
-  - { id: gate.security-scan, severity: BLOCKER, kind: command, command: security-scan, evidence: security-report, owner: security, exception_allowed: false, depends_on: [gate.setup] }
-  - { id: gate.peer-review, severity: REQUIRED, kind: manual-review, evidence: approval-record, owner: engineering, exception_allowed: true }
-  - { id: gate.privacy-review, severity: CONDITIONAL, kind: manual-review, evidence: privacy-review, owner: data, exception_allowed: true }
-  - { id: gate.migration-review, severity: CONDITIONAL, kind: manual-review, evidence: migration-review, owner: data, exception_allowed: true }
-  - { id: gate.release-review, severity: REQUIRED, kind: manual-review, evidence: release-record, owner: sre, exception_allowed: true }
+  - id: gate.setup
+    severity: REQUIRED
+    kind: command
+    command: dependency-setup
+    evidence: command-output
+    owner: platform
+    exception_allowed: true
+  - id: gate.format
+    severity: REQUIRED
+    kind: command
+    command: format
+    evidence: command-output
+    owner: quality
+    exception_allowed: true
+    depends_on:
+      - gate.setup
+  - id: gate.lint
+    severity: REQUIRED
+    kind: command
+    command: lint
+    evidence: command-output
+    owner: quality
+    exception_allowed: true
+    depends_on:
+      - gate.setup
+  - id: gate.typecheck
+    severity: REQUIRED
+    kind: command
+    command: typecheck
+    evidence: command-output
+    owner: quality
+    exception_allowed: true
+    depends_on:
+      - gate.setup
+  - id: gate.unit-test
+    severity: REQUIRED
+    kind: command
+    command: unit-test
+    evidence: test-report
+    owner: quality
+    exception_allowed: true
+    depends_on:
+      - gate.setup
+  - id: gate.integration-test
+    severity: CONDITIONAL
+    kind: command
+    command: integration-test
+    evidence: integration-log
+    owner: quality
+    exception_allowed: true
+    depends_on:
+      - gate.unit-test
+  - id: gate.e2e-test
+    severity: CONDITIONAL
+    kind: command
+    command: e2e-test
+    evidence: e2e-artifact
+    owner: quality
+    exception_allowed: true
+    depends_on:
+      - gate.integration-test
+  - id: gate.build
+    severity: REQUIRED
+    kind: command
+    command: build
+    evidence: build-report
+    owner: platform
+    exception_allowed: true
+    depends_on:
+      - gate.typecheck
+      - gate.unit-test
+  - id: gate.security-scan
+    severity: BLOCKER
+    kind: command
+    command: security-scan
+    evidence: security-report
+    owner: security
+    exception_allowed: false
+    depends_on:
+      - gate.setup
+  - id: gate.peer-review
+    severity: REQUIRED
+    kind: manual-review
+    evidence: approval-record
+    owner: engineering
+    exception_allowed: true
+  - id: gate.control-plane-integrity
+    severity: BLOCKER
+    kind: command
+    command: control-plane-integrity
+    evidence: control-plane-report
+    owner: security
+    exception_allowed: false
+    verification:
+      verifier_id: verifier.control-plane-integrity
+      scope: rule-specific
+      rule_ids:
+        - SEC-009
+  - id: gate.changed-line-coverage
+    severity: REQUIRED
+    kind: command
+    command: changed-line-coverage
+    evidence: coverage-report
+    owner: quality
+    exception_allowed: true
+    depends_on:
+      - gate.unit-test
+  - id: gate.regression-proof
+    severity: REQUIRED
+    kind: command
+    command: regression-proof
+    evidence: regression-proof-report
+    owner: quality
+    exception_allowed: true
+    depends_on:
+      - gate.unit-test
+  - id: gate.incremental-mutation
+    severity: REQUIRED
+    kind: command
+    command: mutation-smoke
+    evidence: mutation-report
+    owner: quality
+    exception_allowed: true
+    depends_on:
+      - gate.regression-proof
+  - id: gate.privacy-review
+    severity: CONDITIONAL
+    kind: manual-review
+    evidence: privacy-review
+    owner: data
+    exception_allowed: true
+  - id: gate.migration-review
+    severity: CONDITIONAL
+    kind: manual-review
+    evidence: migration-review
+    owner: data
+    exception_allowed: true
+  - id: gate.release-review
+    severity: REQUIRED
+    kind: manual-review
+    evidence: release-record
+    owner: sre
+    exception_allowed: true

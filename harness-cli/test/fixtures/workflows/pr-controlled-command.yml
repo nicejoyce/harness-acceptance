@@ -1,0 +1,8 @@
+name: Unsafe executable selection
+on:
+  pull_request_target:
+jobs:
+  prepare-context:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ${{ github.event.pull_request.body }}

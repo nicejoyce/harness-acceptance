@@ -26,6 +26,7 @@
           "executable": { "type": "string", "minLength": 1 },
           "args": { "type": "array", "items": { "type": "string" } },
           "cwd": { "type": "string", "minLength": 1 },
+          "execution_root": { "enum": ["project", "trusted-harness"] },
           "timeout_seconds": { "type": "integer", "minimum": 1, "maximum": 86400 },
           "environment": { "type": "object", "additionalProperties": { "type": "string" } },
           "inherited_environment": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },

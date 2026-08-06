@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdir, mkdtemp, realpath, rename, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rename, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -21,7 +21,7 @@ test('reads changed files between two Git revisions', async () => {
   const head = git('rev-parse', 'HEAD').stdout.trim();
   assert.deepEqual(await changedFilesFromGit(root, base, head), ['src.txt']);
   await mkdir(path.join(root, 'nested', 'policy'), { recursive: true });
-  assert.equal(await gitRepositoryRoot(path.join(root, 'nested', 'policy')), await realpath(root));
+  assert.equal(await gitRepositoryRoot(path.join(root, 'nested', 'policy')), path.resolve(root));
   assert.equal(await resolveGitRevision(root, 'HEAD'), head);
   await assertGitPlanContext(root, base, head, ['src.txt']);
 });

@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "repository", "pull_request", "commit_sha", "author", "captured_at", "subjects"],
+  "properties": {
+    "version": { "const": 1 },
+    "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+    "pull_request": { "type": "integer", "minimum": 1 },
+    "commit_sha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+    "author": { "type": "string", "minLength": 1 },
+    "captured_at": { "type": "string", "minLength": 1 },
+    "subjects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["login", "user_type", "affiliation_state", "api_source", "queried_at"],
+        "properties": {
+          "login": { "type": "string", "minLength": 1 },
+          "user_type": { "enum": ["User", "Bot", "Organization", "App"] },
+          "affiliation_state": { "enum": ["active", "inactive"] },
+          "api_source": { "enum": ["github-organization-membership", "github-repository-collaborator-permission"] },
+          "queried_at": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

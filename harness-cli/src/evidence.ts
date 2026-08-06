@@ -6,10 +6,11 @@ import { loadContracts } from './contracts.ts';
 import type { Diagnostic, ValidationResult } from './diagnostics.ts';
 import { contractsDigest, sha256, stableJson } from './hash.ts';
 import { verifyPlan } from './planner.ts';
-import { assertGitPlanContext, gitRepositoryRoot, pathsReferToSameLocation } from './git.ts';
+import { assertGitPlanContext, gitRepositoryRoot } from './git.ts';
 import { executionContextsEqual, validateExecutionContext } from './context.ts';
 import { schemaErrorMessages, schemaValidator } from './schema.ts';
-import type { ApprovalRecord, EvidenceManifest, ExceptionRecord, ExecutionContext, ExecutionPlan } from './types.ts';
+import { validateRuleAttestations } from './rule-attestations.ts';
+import type { ApprovalRecord, EvidenceManifest, ExceptionRecord, ExecutionContext, ExecutionPlan, RuleAttestationRecord } from './types.ts';
 
 function withoutManifestDigest(manifest: EvidenceManifest): Omit<EvidenceManifest, 'manifest_sha256'> {
   const { manifest_sha256: _ignored, ...content } = manifest;
@@ -84,6 +85,7 @@ export async function verifyEvidence(contractRoot: string, manifestPath: string,
   const plan = await readSnapshot<ExecutionPlan>(evidenceRoot, manifest.plan_path, manifest.plan_path, diagnostics);
   const exceptions = await readSnapshot<ExceptionRecord[]>(evidenceRoot, manifest.exceptions_path, manifest.exceptions_path, diagnostics);
   const approvals = await readSnapshot<ApprovalRecord[]>(evidenceRoot, manifest.approvals_path, manifest.approvals_path, diagnostics);
+  const ruleAttestations = await readSnapshot<RuleAttestationRecord[]>(evidenceRoot, manifest.rule_attestations_path, manifest.rule_attestations_path, diagnostics);
 
   if (plan) {
     const validatePlan = await schemaValidator('plan.schema.json');
@@ -103,6 +105,7 @@ export async function verifyEvidence(contractRoot: string, manifestPath: string,
   }
   if (exceptions) diagnostics.push(...digestDiagnostic(manifest.exceptions_sha256, sha256(stableJson(exceptions)), '/exceptions_sha256', manifestPath));
   if (approvals) diagnostics.push(...digestDiagnostic(manifest.approvals_sha256, sha256(stableJson(approvals)), '/approvals_sha256', manifestPath));
+  if (ruleAttestations) diagnostics.push(...digestDiagnostic(manifest.rule_attestations_sha256, sha256(stableJson(ruleAttestations)), '/rule_attestations_sha256', manifestPath));
 
   if (bundle && plan && exceptions) {
     try {
@@ -110,7 +113,7 @@ export async function verifyEvidence(contractRoot: string, manifestPath: string,
       if (plan.source_revision || plan.source_base_revision) {
         if (!plan.source_revision || !plan.source_base_revision) throw new Error('Git-bound evidence requires both source revisions');
         const gitRoot = await gitRepositoryRoot(projectRoot);
-        if (!await pathsReferToSameLocation(gitRoot, projectRoot)) throw new Error('Project root must be the Git repository root');
+        if (gitRoot !== path.resolve(projectRoot)) throw new Error('Project root must be the Git repository root');
         await assertGitPlanContext(gitRoot, plan.source_base_revision, plan.source_revision, plan.changed_files);
       } else {
         try {
@@ -130,6 +133,7 @@ export async function verifyEvidence(contractRoot: string, manifestPath: string,
     repository: plan?.context?.repository,
     pull_request: plan?.context?.pull_request,
   }));
+  if (bundle && plan && ruleAttestations) diagnostics.push(...await validateRuleAttestations(bundle, plan, ruleAttestations));
 
   const planGates = new Map(plan?.gates.map((gate) => [gate.id, gate]) ?? []);
   const approvalRecords = new Map(approvals?.map((record) => [record.id, record]) ?? []);

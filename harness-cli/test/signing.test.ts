@@ -18,10 +18,17 @@ function result(): FinalResult {
     check_name: 'harness-final',
     job_conclusion: 'success',
     plan_sha256: 'c'.repeat(64),
+    expected_platforms: ['linux', 'win32'],
+    execution_platforms: ['linux', 'win32'],
+    platform_reason_codes: ['platform.baseline', 'platform.windows-semantics'],
+    fallback_full_matrix: false,
+    platform_mode: 'enforce',
     evidence: [
       { platform: 'linux', manifest_sha256: 'd'.repeat(64), result: 'passed' },
       { platform: 'win32', manifest_sha256: 'e'.repeat(64), result: 'passed' },
     ],
+    approvals: [],
+    thresholds: [],
     result: 'passed',
   };
 }

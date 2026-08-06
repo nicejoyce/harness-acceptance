@@ -2,6 +2,12 @@
 
 本文档是 GitHub CI 信任模型的权威来源。本地 `evidence verify` 可以发现制品不一致，但只有受保护的 GitHub 工作流能够生成带签名的最终结论。
 
+## 审核者身份
+
+两个受信 Job 都会重新查询 GitHub，并在把 Review 转换为审批或规则签署前生成绑定提交的身份快照。审核者只有同时满足以下条件才有效：GitHub 返回 `user.type === User`，账号具有当前有效的组织成员资格或仓库 collaborator 权限，配置角色授权该登录名，并且该登录名不是 PR 作者。API 结果缺失、资格撤销、上下文漂移、Bot/App Review 和未知账号一律 fail closed。
+
+Bot 和 App Review 只会单独保留为带正文哈希的 `AgentAttestationRecord` 审计事实，永远不能满足人类审批或 human-attested 规则。本控制只证明 GitHub API 返回的当前账号类型和归属状态，不宣称 proof-of-personhood。
+
 ## Job 边界
 
 1. `prepare-context` 是可信 Job。它从受保护的 base SHA 运行 Harness 代码和合同，读取当前 GitHub Review，生成不可变 Plan，并在不执行项目命令的前提下打包 PR 源码。
@@ -33,6 +39,12 @@ npm run harness -- final verify --input final.signed.json --json
 
 ## 仓库强制控制
 
-保护默认分支，要求一名非作者 CODEOWNER 审批，新提交后撤销过期审批，要求会话已解决且分支为最新，禁止强制推送和删除，并禁止绕过。只将 `harness-final` 配置为 Harness 必需 Check；矩阵 Check 仅用于诊断。
+保护默认分支，要求两名独立的非作者 CODEOWNER 审批，新提交后撤销过期审批，要求会话已解决且分支为最新，禁止强制推送和删除，并禁止绕过。只将 `harness-final` 配置为 Harness 必需 Check；矩阵 Check 仅用于诊断。
 
 可信结论依赖 base 工作流、CODEOWNERS、合同、仓库权限、签名 Secret、公钥 keyring 和分支规则持续受到保护，PR 作者不能修改这些控制。
+
+## 平台 Shadow 与事实记录
+
+受保护 base Plan 同时记录预测平台集合和执行平台集合。Shadow Mode 故意执行完整矩阵，并生成由签名 Final 派生的 `platform-sample.json`；只有预测和全量结果共享同一 commit SHA 与 Plan 摘要时，样本才有效。`platform-metrics` 将非 flaky 漏检与 flaky 失败分开统计，至少 30 个有效样本且漏检率为零后，才允许在 enforce 模式省略平台。
+
+交付记录必须先完成 Evidence 和 Final 签名验证，renderer 不读取日志，也不推断动机。服务边界从受保护 base 加载合同，按租户授权仓库，隐藏测试只能使用无网络/无凭证调用，并且不开放任意 shell 或 MCP 信任权限。

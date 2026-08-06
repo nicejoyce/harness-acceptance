@@ -1,0 +1,152 @@
+version: 1
+policies:
+  - id: attestation.sec-001
+    rule_ids:
+      - SEC-001
+    roles:
+      - security
+    checklist_version: "1"
+    required_claims:
+      - requirements-reviewed
+      - evidence-reviewed
+      - residual-risk-accepted
+  - id: attestation.sec-002
+    rule_ids:
+      - SEC-002
+    roles:
+      - security
+    checklist_version: "1"
+    required_claims:
+      - requirements-reviewed
+      - evidence-reviewed
+      - residual-risk-accepted
+  - id: attestation.sec-003
+    rule_ids:
+      - SEC-003
+    roles:
+      - security
+    checklist_version: "1"
+    required_claims:
+      - requirements-reviewed
+      - evidence-reviewed
+      - residual-risk-accepted
+  - id: attestation.data-001
+    rule_ids:
+      - DATA-001
+    roles:
+      - data
+    checklist_version: "1"
+    required_claims:
+      - requirements-reviewed
+      - evidence-reviewed
+      - residual-risk-accepted
+  - id: attestation.data-002
+    rule_ids:
+      - DATA-002
+    roles:
+      - data
+    checklist_version: "1"
+    required_claims:
+      - requirements-reviewed
+      - evidence-reviewed
+      - residual-risk-accepted
+  - id: attestation.data-005
+    rule_ids:
+      - DATA-005
+    roles:
+      - data
+    checklist_version: "1"
+    required_claims:
+      - requirements-reviewed
+      - evidence-reviewed
+      - residual-risk-accepted
+  - id: attestation.bound-005
+    rule_ids:
+      - BOUND-005
+    roles:
+      - api
+    checklist_version: "1"
+    required_claims:
+      - requirements-reviewed
+      - evidence-reviewed
+      - residual-risk-accepted
+  - id: attestation.bound-006
+    rule_ids:
+      - BOUND-006
+    roles:
+      - api
+    checklist_version: "1"
+    required_claims:
+      - requirements-reviewed
+      - evidence-reviewed
+      - residual-risk-accepted
+  - id: attestation.arch-007
+    rule_ids:
+      - ARCH-007
+    roles:
+      - engineering
+    checklist_version: "1"
+    required_claims:
+      - requirements-reviewed
+      - evidence-reviewed
+      - residual-risk-accepted
+  - id: attestation.ui-001
+    rule_ids:
+      - UI-001
+    roles:
+      - frontend
+    checklist_version: "1"
+    required_claims:
+      - requirements-reviewed
+      - evidence-reviewed
+      - residual-risk-accepted
+  - id: attestation.dep-003
+    rule_ids:
+      - DEP-003
+    roles:
+      - platform
+    checklist_version: "1"
+    required_claims:
+      - requirements-reviewed
+      - evidence-reviewed
+      - residual-risk-accepted
+  - id: attestation.ops-006
+    rule_ids:
+      - OPS-006
+    roles:
+      - sre
+    checklist_version: "1"
+    required_claims:
+      - requirements-reviewed
+      - evidence-reviewed
+      - residual-risk-accepted
+  - id: attestation.doc-001
+    rule_ids:
+      - DOC-001
+    roles:
+      - engineering
+    checklist_version: "1"
+    required_claims:
+      - requirements-reviewed
+      - evidence-reviewed
+      - residual-risk-accepted
+  - id: attestation.ai-002
+    rule_ids:
+      - AI-002
+    roles:
+      - security
+    checklist_version: "1"
+    required_claims:
+      - requirements-reviewed
+      - evidence-reviewed
+      - residual-risk-accepted
+  - id: attestation.ai-004
+    rule_ids:
+      - AI-004
+    roles:
+      - security
+    checklist_version: "1"
+    required_claims:
+      - requirements-reviewed
+      - evidence-reviewed
+      - residual-risk-accepted

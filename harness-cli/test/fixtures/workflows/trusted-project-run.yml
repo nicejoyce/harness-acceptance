@@ -1,0 +1,9 @@
+name: Unsafe checkout execution
+on:
+  pull_request_target:
+jobs:
+  harness-final:
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm test
+        working-directory: project

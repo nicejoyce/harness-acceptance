@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "mode", "platforms", "baseline_platforms", "full_matrix", "full_matrix_operations", "full_matrix_route_ids", "rules"],
+  "properties": {
+    "version": { "const": 1 },
+    "mode": { "enum": ["shadow", "enforce"] },
+    "platforms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["linux", "win32", "darwin"],
+      "properties": {
+        "linux": { "$ref": "#/definitions/platform" },
+        "win32": { "$ref": "#/definitions/platform" },
+        "darwin": { "$ref": "#/definitions/platform" }
+      }
+    },
+    "baseline_platforms": { "$ref": "#/definitions/platformList" },
+    "full_matrix": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "enum": ["linux", "win32", "darwin"] },
+      "uniqueItems": true
+    },
+    "full_matrix_operations": { "type": "array", "items": { "enum": ["change", "merge", "release"] }, "uniqueItems": true },
+    "full_matrix_route_ids": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "reason_code", "include", "platforms"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^platform-rule\\.[a-z0-9][a-z0-9.-]*$" },
+          "reason_code": { "type": "string", "pattern": "^platform\\.[a-z0-9][a-z0-9.-]*$" },
+          "include": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+          "platforms": { "$ref": "#/definitions/platformList" }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "platform": { "type": "object", "additionalProperties": false, "required": ["runner"], "properties": { "runner": { "type": "string", "minLength": 1 } } },
+    "platformList": { "type": "array", "minItems": 1, "items": { "enum": ["linux", "win32", "darwin"] }, "uniqueItems": true }
+  }
+}

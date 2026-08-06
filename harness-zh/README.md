@@ -32,11 +32,15 @@ npm run harness -- evidence verify --root harness-zh --manifest .harness/evidenc
 
 运行时凭证必须通过 `inherited_environment` 指定；敏感变量还必须列入 `sensitive_environment`。敏感值不得写入 `environment` 或提交到项目画像，合同校验会拒绝这类配置。
 
-GitHub 拉取请求需要在 `approvals.roles` 中配置获准的 GitHub 登录名。工作流通过 `approvals github` 将绑定当前提交的 `APPROVED` Review 转为结构化审批；后续 `CHANGES_REQUESTED` 或 `DISMISSED` 会撤销审批。审批记录同时绑定仓库、拉取请求、Review ID 和计划提交。条件 Gate 采用 fail-closed，必须提供对应的 `*-required` PR 标签。Evidence 验证的 `--root` 必须指向 canonical Harness 目录，而不是 Evidence 目录。
+GitHub 拉取请求需要在 `approvals.roles` 中配置获准的 GitHub 登录名。只有受信身份快照同时确认 `user.type === User`、当前组织成员资格或仓库 collaborator 权限，且审核者不是 PR 作者时，工作流才会通过 `approvals github` 将绑定当前提交的 `APPROVED` Review 转为结构化审批。Bot/App Review 仅保留为 Agent 审计签署；后续 `CHANGES_REQUESTED`、`DISMISSED` 或身份撤销会撤销审批。审批记录同时绑定仓库、拉取请求、Review ID 和计划提交。条件 Gate 采用 fail-closed，必须提供对应的 `*-required` PR 标签。Evidence 验证的 `--root` 必须指向 canonical Harness 目录，而不是 Evidence 目录。
 
 Git 绑定计划要求 base/head 差异非空、当前 `HEAD` 精确匹配、变更文件集合完全一致，并且项目命令运行前不存在 tracked、staged、untracked 或 ignored 文件。CLI 稳定退出码为：`0` 成功、`1` 内部错误、`2` 合同无效、`3` 规划或 Git 上下文失败、`4` 普通 Gate 失败、`5` Evidence 无效、`6` Gate 超时、`7` 执行取消。
 
 `evidence verify` 只证明 Schema、摘要、canonical 计划、审批、例外和仓库上下文的一致性。SHA-256 摘要不是签名，不能独立证明命令确实执行。GitHub 使用可信 `prepare-context` Job、无凭证项目矩阵和可信 `harness-final` Job 重新计算结果，并使用 Ed25519 签署唯一最终结论。上下文绑定、密钥保管、验签、轮换和分支保护要求见 `governance/trusted-execution.md`。
+
+平台选择由受保护 base Plan 计算：普通变更预测 Linux，Windows 路径/进程语义和 macOS 权限语义会追加对应平台；控制面、发布、lockfile、未知路径或策略异常使用完整 `linux/win32/darwin` 矩阵。当前处于 Shadow Mode：仍执行全部平台，并由 `platform-sample.json` 记录预测集合、全量结果、commit SHA 和 Plan 摘要。只有至少 30 个配对样本且非 flaky 漏检率为零，才允许省略平台。
+
+`records render` 会先验证签名 Final 和 Evidence，再生成交付记录。哈希、门禁、审批、平台、阈值、工具版本和签名 key ID 都是自动派生事实；目标、设计动机、风险判断、业务理由和回滚决策保持为空，由责任人填写。可选的 `harness-service` 只提供 validate、plan、Evidence 验证和服务端隔离的隐藏测试接口，不接受任意 shell，也不把 MCP 当作信任根。
 
 ## 目录说明
 

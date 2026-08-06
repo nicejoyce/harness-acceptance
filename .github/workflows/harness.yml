@@ -12,32 +12,45 @@ jobs:
   prepare-context:
     name: harness-prepare-context
     runs-on: ubuntu-latest
+    outputs:
+      platform_matrix: ${{ steps.prepare.outputs.platform_matrix }}
     permissions:
       contents: read
       pull-requests: read
     steps:
+      - name: Harden runner network policy
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2
+        with:
+          egress-policy: audit
       - name: Checkout pull request Git data without executing it
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
           path: project
           persist-credentials: false
       - name: Checkout trusted Harness from the protected base revision
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 1
           ref: ${{ github.event.pull_request.base.sha }}
           path: trusted-harness
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
           cache-dependency-path: trusted-harness/package-lock.json
       - name: Install trusted Harness dependencies
         run: npm ci --prefix trusted-harness
+      - name: Validate pull request workflow as untrusted data
+        run: node trusted-harness/harness-cli/src/cli.ts workflow-policy check --workflow-root project/.github/workflows --baseline-workflow-root trusted-harness/.github/workflows --json
+      - name: Run pinned external workflow auditors
+        run: node trusted-harness/harness-cli/src/cli.ts workflow-policy audit-external --config trusted-harness/harness-cli/config/workflow-security-tools.json --workflow-root project/.github/workflows --tools-dir workflow-security-tools --json
+      - name: Verify candidate control plane with trusted policy
+        run: node trusted-harness/harness-cli/src/cli.ts control-plane verify --baseline-root trusted-harness --candidate-root project --json
       - name: Build immutable plan and approvals
+        id: prepare
         shell: bash
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -45,6 +58,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
           PR_LABELS_JSON: ${{ toJSON(github.event.pull_request.labels.*.name) }}
         run: |
           set -euo pipefail
@@ -55,9 +69,20 @@ jobs:
           trap cleanup_bundle_refs EXIT
           mkdir -p "prepared"
           node trusted-harness/harness-cli/src/cli.ts validate --root trusted-harness/harness
-          node trusted-harness/harness-cli/src/cli.ts plan --root trusted-harness/harness --project-root project --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --git-base "$BASE_SHA" --git-head "$HEAD_SHA" --operation merge --environment test --risk-labels-json "$PR_LABELS_JSON" --output prepared/plan.json
+          node trusted-harness/harness-cli/src/cli.ts plan --root trusted-harness/harness --project-root project --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --git-base "$BASE_SHA" --git-head "$HEAD_SHA" --operation merge --environment test --lane full --risk-labels-json "$PR_LABELS_JSON" --output prepared/plan.json
+          PLATFORM_MATRIX=$(node trusted-harness/harness-cli/src/cli.ts platforms matrix --root trusted-harness/harness --plan prepared/plan.json --json)
+          echo "platform_matrix=$PLATFORM_MATRIX" >> "$GITHUB_OUTPUT"
           gh api --paginate "repos/$GH_REPOSITORY/pulls/$PR_NUMBER/reviews" | jq -s 'add' > "prepared/reviews.json"
-          node trusted-harness/harness-cli/src/cli.ts approvals github --root trusted-harness/harness --project-root project --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --plan prepared/plan.json --reviews prepared/reviews.json --output prepared/approvals.json
+          CAPTURED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          : > "prepared/identity-subjects.ndjson"
+          jq -r '.[].user.login // empty' "prepared/reviews.json" | sort -fu | while IFS= read -r LOGIN; do
+            gh api "repos/$GH_REPOSITORY/collaborators/$LOGIN/permission" | jq --arg queried_at "$CAPTURED_AT" '{login: .user.login, user_type: .user.type, affiliation_state: (if .permission == "none" then "inactive" else "active" end), api_source: "github-repository-collaborator-permission", queried_at: $queried_at}' >> "prepared/identity-subjects.ndjson"
+          done
+          jq -s '.' "prepared/identity-subjects.ndjson" > "prepared/identity-subjects.json"
+          node trusted-harness/harness-cli/src/cli.ts identities github --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --author "$PR_AUTHOR" --subjects prepared/identity-subjects.json --captured-at "$CAPTURED_AT" --output prepared/identity-snapshot.json
+          node trusted-harness/harness-cli/src/cli.ts attestations agents --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --reviews prepared/reviews.json --output prepared/agent-attestations.json
+          node trusted-harness/harness-cli/src/cli.ts approvals github --root trusted-harness/harness --project-root project --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --plan prepared/plan.json --reviews prepared/reviews.json --identities prepared/identity-snapshot.json --output prepared/approvals.json
+          node trusted-harness/harness-cli/src/cli.ts attestations github --root trusted-harness/harness --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --plan prepared/plan.json --reviews prepared/reviews.json --identities prepared/identity-snapshot.json --output prepared/rule-attestations.json
           git -C "project" update-ref "refs/heads/harness-bundle-base" "$BASE_SHA"
           git -C "project" update-ref "refs/heads/harness-bundle-head" "$HEAD_SHA"
           git -C "project" bundle create "../prepared/project.bundle" "refs/heads/harness-bundle-base" "refs/heads/harness-bundle-head"
@@ -66,7 +91,7 @@ jobs:
           git -C "project" update-ref -d "refs/heads/harness-bundle-head"
           trap - EXIT
       - name: Upload trusted execution inputs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: harness-prepared
           path: |
@@ -75,17 +100,20 @@ jobs:
           if-no-files-found: error
 
   harness:
-    name: harness-${{ matrix.os }}
+    name: harness-${{ matrix.platform }}
     needs: prepare-context
     permissions: {}
     strategy:
       fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+      matrix: ${{ fromJSON(needs.prepare-context.outputs.platform_matrix) }}
+    runs-on: ${{ matrix.runner }}
     steps:
+      - name: Harden runner network policy
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2
+        with:
+          egress-policy: audit
       - name: Download trusted execution inputs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: harness-prepared
           path: .
@@ -99,7 +127,7 @@ jobs:
           git -C "project" checkout --detach "$HEAD_SHA"
           git -C "project" rev-parse --verify "$BASE_SHA^{commit}"
           git -C "project" rev-parse --verify "$HEAD_SHA^{commit}"
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
@@ -113,13 +141,14 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GH_REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
-          node trusted-harness/harness-cli/src/cli.ts run --root trusted-harness/harness --project-root project --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --github-repository "$GH_REPOSITORY" --github-run-id "$GITHUB_RUN_ID" --github-run-attempt "$GITHUB_RUN_ATTEMPT" --github-workflow-ref "$GITHUB_WORKFLOW_REF" --github-event-name "$GITHUB_EVENT_NAME" --plan prepared/plan.json --approvals prepared/approvals.json --output evidence
+          node trusted-harness/harness-cli/src/cli.ts run --root trusted-harness/harness --project-root project --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --github-repository "$GH_REPOSITORY" --github-run-id "$GITHUB_RUN_ID" --github-run-attempt "$GITHUB_RUN_ATTEMPT" --github-workflow-ref "$GITHUB_WORKFLOW_REF" --github-event-name "$GITHUB_EVENT_NAME" --plan prepared/plan.json --approvals prepared/approvals.json --rule-attestations prepared/rule-attestations.json --output evidence
       - name: Upload Harness evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: harness-evidence-${{ matrix.os }}
+          name: harness-evidence-${{ matrix.platform }}
           path: evidence
           if-no-files-found: error
 
@@ -133,21 +162,25 @@ jobs:
       pull-requests: read
       checks: write
     steps:
+      - name: Harden runner network policy
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2
+        with:
+          egress-policy: audit
       - name: Checkout pull request Git data without executing it
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
           path: project
           persist-credentials: false
       - name: Checkout trusted Harness from the protected base revision
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 1
           ref: ${{ github.event.pull_request.base.sha }}
           path: trusted-harness
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
@@ -155,12 +188,12 @@ jobs:
       - name: Install trusted Harness dependencies
         run: npm ci --prefix trusted-harness
       - name: Download prepared plan
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: harness-prepared
           path: trusted-inputs
       - name: Download all untrusted evidence
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           pattern: harness-evidence-*
           path: evidence
@@ -173,6 +206,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
           JOB_CONCLUSION: ${{ needs.harness.result }}
           HARNESS_ED25519_PRIVATE_KEY_B64: ${{ secrets.HARNESS_ED25519_PRIVATE_KEY_B64 }}
           HARNESS_ED25519_PUBLIC_KEYS_JSON: ${{ vars.HARNESS_ED25519_PUBLIC_KEYS_JSON }}
@@ -180,11 +214,25 @@ jobs:
         run: |
           set -euo pipefail
           gh api --paginate "repos/$GH_REPOSITORY/pulls/$PR_NUMBER/reviews" | jq -s 'add' > "current-reviews.json"
-          node trusted-harness/harness-cli/src/cli.ts approvals github --root trusted-harness/harness --project-root project --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --plan trusted-inputs/prepared/plan.json --reviews current-reviews.json --output expected-approvals.json
+          CAPTURED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          : > "current-identity-subjects.ndjson"
+          jq -r '.[].user.login // empty' "current-reviews.json" | sort -fu | while IFS= read -r LOGIN; do
+            gh api "repos/$GH_REPOSITORY/collaborators/$LOGIN/permission" | jq --arg queried_at "$CAPTURED_AT" '{login: .user.login, user_type: .user.type, affiliation_state: (if .permission == "none" then "inactive" else "active" end), api_source: "github-repository-collaborator-permission", queried_at: $queried_at}' >> "current-identity-subjects.ndjson"
+          done
+          jq -s '.' "current-identity-subjects.ndjson" > "current-identity-subjects.json"
+          node trusted-harness/harness-cli/src/cli.ts identities github --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --author "$PR_AUTHOR" --subjects current-identity-subjects.json --captured-at "$CAPTURED_AT" --output current-identity-snapshot.json
+          node trusted-harness/harness-cli/src/cli.ts attestations agents --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --reviews current-reviews.json --output current-agent-attestations.json
+          node trusted-harness/harness-cli/src/cli.ts approvals github --root trusted-harness/harness --project-root project --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --plan trusted-inputs/prepared/plan.json --reviews current-reviews.json --identities current-identity-snapshot.json --output expected-approvals.json
+          node trusted-harness/harness-cli/src/cli.ts attestations github --root trusted-harness/harness --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" --plan trusted-inputs/prepared/plan.json --reviews current-reviews.json --identities current-identity-snapshot.json --output expected-rule-attestations.json
           MANIFEST_ARGS=()
           while IFS= read -r manifest; do MANIFEST_ARGS+=(--manifest "$manifest"); done < <(find evidence -name manifest.json -type f -print | sort)
-          node trusted-harness/harness-cli/src/cli.ts final aggregate --root trusted-harness/harness --project-root project --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" "${MANIFEST_ARGS[@]}" --expected-approvals expected-approvals.json --job-conclusion "$JOB_CONCLUSION" --output final.signed.json
+          node trusted-harness/harness-cli/src/cli.ts final aggregate --root trusted-harness/harness --project-root project --repository "$GH_REPOSITORY" --pull-request "$PR_NUMBER" --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA" "${MANIFEST_ARGS[@]}" --expected-approvals expected-approvals.json --expected-rule-attestations expected-rule-attestations.json --job-conclusion "$JOB_CONCLUSION" --output final.signed.json --platform-sample-output platform-sample.json
           node trusted-harness/harness-cli/src/cli.ts final verify --input final.signed.json
+          : > final-record.md
+          while IFS= read -r manifest; do
+            node trusted-harness/harness-cli/src/cli.ts records render --root trusted-harness/harness --project-root project --manifest "$manifest" --final final.signed.json --format markdown >> final-record.md
+          done < <(find evidence -name manifest.json -type f -print | sort)
+          cat final-record.md >> "$GITHUB_STEP_SUMMARY"
       - name: Publish harness-final Check
         if: always()
         shell: bash
@@ -195,9 +243,9 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           AGGREGATE_OUTCOME: ${{ steps.aggregate.outcome }}
         run: |
-          if [[ "$AGGREGATE_OUTCOME" == "success" && -f final.signed.json ]]; then
+          if [[ "$AGGREGATE_OUTCOME" == "success" && -f final.signed.json && -f final-record.md ]]; then
             RESULT=$(node -e "const f=require('./final.signed.json'); process.stdout.write(f.payload.result)")
-            SUMMARY=$(node -e "const f=require('./final.signed.json'); const p=f.payload; process.stdout.write(['Result: '+p.result,'Repository: '+p.context.repository,'Pull request: '+p.context.pull_request,'Head SHA: '+p.context.head_sha,'Plan SHA-256: '+p.plan_sha256,'Evidence: '+p.evidence.map((item)=>item.platform+':'+item.manifest_sha256).join(', '),'Signing key ID: '+f.key_id].join('\\n'))")
+            SUMMARY=$(cat final-record.md)
           else
             RESULT=failed
             SUMMARY=$(printf 'Result: failed\nRepository: %s\nPull request: %s\nHead SHA: %s\nSigned final result unavailable' "$GH_REPOSITORY" "$PR_NUMBER" "$HEAD_SHA")
@@ -207,8 +255,11 @@ jobs:
           [[ "$CONCLUSION" == "success" ]]
       - name: Upload signed final result
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: harness-final-signed
-          path: final.signed.json
+          path: |
+            final.signed.json
+            final-record.md
+            platform-sample.json
           if-no-files-found: warn

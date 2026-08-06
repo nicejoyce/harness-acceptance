@@ -19,12 +19,15 @@ export interface PublicSnapshotResult {
 const allowedFiles = new Set([
   '.gitignore',
   '.github/workflows/harness.yml',
+  '.github/workflows/harness-platform-audit.yml',
   'CODEOWNERS.template',
   'package.json',
   'package-lock.json',
   'tsconfig.json',
+  'stryker.config.json',
+  'stryker.full.config.json',
 ]);
-const allowedRoots = ['harness/', 'harness-zh/', 'harness-cli/', 'fixtures/', 'docs/acceptance/', 'scripts/'];
+const allowedRoots = ['harness/', 'harness-zh/', 'harness-cli/', 'harness-service/', 'fixtures/', 'docs/acceptance/', 'scripts/'];
 
 function normalized(relativePath: string): string {
   return relativePath.replaceAll('\\', '/');
@@ -38,7 +41,7 @@ function inside(parent: string, candidate: string): boolean {
 function allowed(relativePath: string): boolean {
   const segments = relativePath.split('/');
   const basename = segments.at(-1) ?? '';
-  const deniedSegment = segments.some((segment) => ['.git', '.harness', '.superpowers', '.cache', '__pycache__', 'node_modules', 'coverage', 'dist', 'evidence', 'logs'].includes(segment.toLowerCase()));
+  const deniedSegment = segments.some((segment) => ['.git', '.harness', '.superpowers', '.cache', 'node_modules', 'coverage', 'dist', 'evidence', 'logs'].includes(segment.toLowerCase()));
   const deniedFile = basename.toLowerCase().startsWith('.env')
     || /\.(?:log|pem|key|p12|pfx)$/i.test(basename)
     || /\.local(?:\.|$)/i.test(basename)
@@ -48,12 +51,6 @@ function allowed(relativePath: string): boolean {
 
 function sha256(content: Buffer): string {
   return createHash('sha256').update(content).digest('hex');
-}
-
-function canonicalizeText(content: Buffer, relativePath: string): Buffer {
-  const decoded = content.toString('utf8');
-  if (!Buffer.from(decoded, 'utf8').equals(content)) throw new Error(`Public snapshot candidate must be UTF-8 text: ${relativePath}`);
-  return Buffer.from(decoded.replace(/\r\n?/g, '\n'), 'utf8');
 }
 
 function validateReviewerLogin(login: string): void {
@@ -89,27 +86,21 @@ export async function exportPublicSnapshot(options: PublicSnapshotOptions): Prom
     if (!inside(sourceRoot, sourcePath)) throw new Error(`Snapshot path escapes the source repository: ${relativePath}`);
     const metadata = await lstat(sourcePath);
     if (!metadata.isFile() || metadata.isSymbolicLink()) throw new Error(`Snapshot candidate must be a regular file: ${relativePath}`);
-    let content = canonicalizeText(await readFile(sourcePath), relativePath);
-    let outputs = [{ path: relativePath, content }];
+    const outputPath = relativePath === 'CODEOWNERS.template' ? 'CODEOWNERS' : relativePath;
+    let content = await readFile(sourcePath);
     if (relativePath === 'CODEOWNERS.template') {
       const rendered = content.toString('utf8').replaceAll('{{ACCEPTANCE_REVIEWER_LOGIN}}', options.reviewer_login);
       if (rendered.includes('{{')) throw new Error('CODEOWNERS template contains an unresolved placeholder');
-      outputs = [
-        { path: relativePath, content },
-        { path: 'CODEOWNERS', content: Buffer.from(rendered) },
-      ];
+      content = Buffer.from(rendered);
     } else if (['harness/config/project-profile.yaml', 'harness-zh/config/project-profile.yaml'].includes(relativePath)) {
       content = renderApprovalRoles(content, options.reviewer_login, relativePath);
-      outputs = [{ path: relativePath, content }];
     }
-    for (const output of outputs) {
-      const destination = path.resolve(outputRoot, output.path);
-      if (!inside(outputRoot, destination)) throw new Error(`Snapshot path escapes the output directory: ${output.path}`);
-      await mkdir(path.dirname(destination), { recursive: true });
-      await writeFile(destination, output.content);
-      exported.push(output.path);
-      manifestFiles.push({ path: output.path, sha256: sha256(output.content) });
-    }
+    const destination = path.resolve(outputRoot, outputPath);
+    if (!inside(outputRoot, destination)) throw new Error(`Snapshot path escapes the output directory: ${outputPath}`);
+    await mkdir(path.dirname(destination), { recursive: true });
+    await writeFile(destination, content);
+    exported.push(outputPath);
+    manifestFiles.push({ path: outputPath, sha256: sha256(content) });
   }
 
   manifestFiles.sort((left, right) => left.path.localeCompare(right.path));

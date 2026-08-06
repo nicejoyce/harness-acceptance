@@ -9,6 +9,9 @@
 
 ## Dependencies
 
+- Reinstalling an already reviewed lockfile with the approved registry, install scripts disabled, no new native modules, and no new network capability is a preauthorized operation; it is not a dependency-graph change.
+- Any manifest, lockfile, registry, install-script, native-module, or network-capability change is a privileged dependency change and requires approval.
+- Lockfile integrity, license, SBOM, vulnerability-scan, and install-script-scan evidence must be present. Missing or unknown evidence fails closed.
 - Add only pinned, justified dependencies from approved sources.
 - Review license, maintenance, vulnerability posture, transitive impact, and replacement plan before adding a runtime dependency.
 - Update manifest and lock file only through the approved package manager.

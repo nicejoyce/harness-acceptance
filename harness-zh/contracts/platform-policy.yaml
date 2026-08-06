@@ -1,0 +1,23 @@
+version: 1
+mode: shadow
+platforms:
+  linux: { runner: ubuntu-latest }
+  win32: { runner: windows-latest }
+  darwin: { runner: macos-latest }
+baseline_platforms: [linux]
+full_matrix: [linux, win32, darwin]
+full_matrix_operations: [release]
+full_matrix_route_ids: [route.unknown, route.harness-self]
+rules:
+  - id: platform-rule.windows
+    reason_code: platform.windows-semantics
+    include: ['**/*.ps1', '**/*.psm1', '**/*.bat', '**/*.cmd', '**/*windows*', '**/*win32*', '**/process-tree/**']
+    platforms: [win32]
+  - id: platform-rule.macos
+    reason_code: platform.macos-semantics
+    include: ['**/*.command', '**/*macos*', '**/macos/**', '**/*darwin*', '**/darwin/**', '**/permissions/**']
+    platforms: [darwin]
+  - id: platform-rule.control-plane
+    reason_code: platform.full-control-plane
+    include: ['.github/workflows/**', 'CODEOWNERS', 'CODEOWNERS.template', 'harness/**', 'harness-zh/**', 'harness-cli/**', 'harness-service/**', 'package-lock.json', 'stryker.config.json']
+    platforms: [linux, win32, darwin]

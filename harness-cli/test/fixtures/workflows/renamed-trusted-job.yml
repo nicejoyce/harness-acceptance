@@ -1,0 +1,11 @@
+name: Renamed trusted job
+on:
+  pull_request_target:
+jobs:
+  guardrail-v2:
+    permissions: {}
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: ./project/publish.sh

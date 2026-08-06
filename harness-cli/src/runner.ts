@@ -8,10 +8,11 @@ import { contractsDigest, sha256, stableJson } from './hash.ts';
 import { redact } from './redaction.ts';
 import { PlanningError, verifyPlan } from './planner.ts';
 import { approvalForGate, approvalsForRole, validateApprovals } from './approvals.ts';
-import { assertGitPlanContext, canonicalPath, gitRepositoryRoot, pathsReferToSameLocation } from './git.ts';
+import { assertGitPlanContext, gitRepositoryRoot, resolveGitRevision } from './git.ts';
 import { executionContextFromParts, executionContextsEqual } from './context.ts';
+import { validateRuleAttestations } from './rule-attestations.ts';
 import { terminateProcessTree } from './process-tree.ts';
-import type { ApprovalRecord, CiProvenance, CommandDescriptor, ContractBundle, EvidenceManifest, ExceptionRecord, ExecutionPlan, GateEvidence, GateState, PlannedGate } from './types.ts';
+import type { ApprovalRecord, CiProvenance, CommandDescriptor, ContractBundle, EvidenceManifest, ExceptionRecord, ExecutionPlan, GateEvidence, GateState, PlannedGate, RuleAttestationRecord } from './types.ts';
 
 export interface RunOptions {
   output_dir: string;
@@ -19,6 +20,7 @@ export interface RunOptions {
   signal?: AbortSignal;
   exceptions?: ExceptionRecord[];
   approvals?: ApprovalRecord[];
+  rule_attestations?: RuleAttestationRecord[];
   repository?: string;
   pull_request?: number;
   base_sha?: string;
@@ -27,11 +29,11 @@ export interface RunOptions {
 }
 
 async function repositoryRoot(bundle: ContractBundle, projectRoot?: string): Promise<string> {
-  if (projectRoot) return canonicalPath(projectRoot);
+  if (projectRoot) return path.resolve(projectRoot);
   try {
     return await gitRepositoryRoot(bundle.root);
   } catch {
-    return canonicalPath(bundle.root);
+    return path.resolve(bundle.root);
   }
 }
 
@@ -57,7 +59,7 @@ function commandSecrets(command: CommandDescriptor): string[] {
   return (command.sensitive_environment ?? []).map((key) => command.environment?.[key] ?? (command.inherited_environment?.includes(key) ? process.env[key] : undefined)).filter((value): value is string => value !== undefined);
 }
 
-async function executeGate(root: string, gate: PlannedGate, command: CommandDescriptor, outputDir: string, signal?: AbortSignal): Promise<GateEvidence> {
+async function executeGate(root: string, gate: PlannedGate, command: CommandDescriptor, outputDir: string, signal?: AbortSignal, timeoutSeconds = command.timeout_seconds): Promise<GateEvidence> {
   const started = new Date();
   const chunks: Buffer[] = [];
   let state: GateState = 'failed';
@@ -87,7 +89,7 @@ async function executeGate(root: string, gate: PlannedGate, command: CommandDesc
     const timeout = setTimeout(() => {
       timedOut = true;
       if (child.pid) void terminateProcessTree(child.pid);
-    }, command.timeout_seconds * 1000);
+    }, timeoutSeconds * 1000);
     const abort = () => { if (child.pid) void terminateProcessTree(child.pid); };
     signal?.addEventListener('abort', abort, { once: true });
     child.on('error', (error) => chunks.push(Buffer.from(`${error.name}: ${error.message}\n`)));
@@ -125,6 +127,8 @@ export async function runPlan(bundle: ContractBundle, plan: ExecutionPlan, optio
   const context = executionContextFromParts(options.repository, options.pull_request, options.base_sha, options.head_sha);
   if (!executionContextsEqual(plan.context, context)) throw new PlanningError('Run GitHub execution context does not match the plan');
   await verifyPlan(bundle, plan, options.exceptions ?? []);
+  const ruleAttestationDiagnostics = await validateRuleAttestations(bundle, plan, options.rule_attestations ?? []);
+  if (ruleAttestationDiagnostics.length > 0) throw new Error(JSON.stringify(ruleAttestationDiagnostics));
   const approvalDiagnostics = await validateApprovals(bundle, options.approvals ?? [], {
     source_revision: plan.source_revision,
     repository: context?.repository,
@@ -135,7 +139,7 @@ export async function runPlan(bundle: ContractBundle, plan: ExecutionPlan, optio
   if (plan.source_revision || plan.source_base_revision) {
     if (!plan.source_revision || !plan.source_base_revision) throw new PlanningError('Git-bound plans require both source revisions');
     const gitRoot = await gitRepositoryRoot(root);
-    if (!await pathsReferToSameLocation(gitRoot, root)) throw new PlanningError('Project root must be the Git repository root');
+    if (gitRoot !== path.resolve(root)) throw new PlanningError('Project root must be the Git repository root');
     await assertGitPlanContext(root, plan.source_base_revision, plan.source_revision, plan.changed_files);
   } else {
     try {
@@ -149,13 +153,26 @@ export async function runPlan(bundle: ContractBundle, plan: ExecutionPlan, optio
   await mkdir(outputDir, { recursive: true });
   const exceptions = options.exceptions ?? [];
   const approvals = options.approvals ?? [];
+  const ruleAttestations = options.rule_attestations ?? [];
   await Promise.all([
     writeFile(path.join(outputDir, 'plan.json'), `${JSON.stringify(plan, null, 2)}\n`, 'utf8'),
     writeFile(path.join(outputDir, 'exceptions.json'), `${JSON.stringify(exceptions, null, 2)}\n`, 'utf8'),
     writeFile(path.join(outputDir, 'approvals.json'), `${JSON.stringify(approvals, null, 2)}\n`, 'utf8'),
+    writeFile(path.join(outputDir, 'rule-attestations.json'), `${JSON.stringify(ruleAttestations, null, 2)}\n`, 'utf8'),
   ]);
   const started = new Date();
+  const fastDeadline = plan.lane === 'fast' ? started.valueOf() + 60_000 : Number.POSITIVE_INFINITY;
   const results: GateEvidence[] = [];
+  let trustedHarnessRoot: string | undefined;
+
+  const commandRoot = async (command: CommandDescriptor): Promise<string> => {
+    if (command.execution_root !== 'trusted-harness') return root;
+    if (!plan.source_base_revision) throw new PlanningError('Trusted Harness commands require a Git-bound plan base revision');
+    trustedHarnessRoot ??= await gitRepositoryRoot(bundle.root);
+    const trustedRevision = await resolveGitRevision(trustedHarnessRoot, 'HEAD');
+    if (trustedRevision !== plan.source_base_revision) throw new PlanningError('Trusted Harness checkout must match the plan base revision');
+    return trustedHarnessRoot;
+  };
 
   for (const gate of plan.gates) {
     if (gate.depends_on.some((id) => results.find((result) => result.gate_id === id)?.state !== 'passed')) continue;
@@ -176,7 +193,13 @@ export async function runPlan(bundle: ContractBundle, plan: ExecutionPlan, optio
       results.push({ gate_id: gate.id, rule_ids: gate.rule_ids, started_at: now, ended_at: now, duration_ms: 0, exit_code: null, state: 'failed' });
       continue;
     }
-    results.push(await executeGate(root, gate, command, outputDir, options.signal));
+    const remainingSeconds = Math.floor((fastDeadline - Date.now()) / 1000);
+    if (plan.lane === 'fast' && remainingSeconds <= 0) {
+      const now = new Date().toISOString();
+      results.push({ gate_id: gate.id, rule_ids: gate.rule_ids, started_at: now, ended_at: now, duration_ms: 0, exit_code: null, state: 'timed_out' });
+      continue;
+    }
+    results.push(await executeGate(await commandRoot(command), gate, command, outputDir, options.signal, Math.max(1, Math.min(command.timeout_seconds, remainingSeconds))));
   }
 
   const ended = new Date();
@@ -187,6 +210,8 @@ export async function runPlan(bundle: ContractBundle, plan: ExecutionPlan, optio
   });
   const manifest = finalizeManifest({
     version: 1,
+    lane: plan.lane,
+    risk_tier: plan.risk_tier,
     harness_version: '0.1.0',
     run_id: randomUUID(),
     repository_root: root,
@@ -206,6 +231,8 @@ export async function runPlan(bundle: ContractBundle, plan: ExecutionPlan, optio
     exceptions_sha256: sha256(stableJson(exceptions)),
     approvals_path: 'approvals.json',
     approvals_sha256: sha256(stableJson(approvals)),
+    rule_attestations_path: 'rule-attestations.json',
+    rule_attestations_sha256: sha256(stableJson(ruleAttestations)),
     started_at: started.toISOString(),
     ended_at: ended.toISOString(),
     gates: results,

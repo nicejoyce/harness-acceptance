@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "valid_samples", "invalid_samples", "false_negative_count", "false_negative_rate", "full_matrix_fallback_rate", "platform_savings", "flaky_failure_rate", "eligible_for_enforcement", "diagnostics"],
+  "properties": {
+    "version": { "const": 1 },
+    "valid_samples": { "type": "integer", "minimum": 0 },
+    "invalid_samples": { "type": "integer", "minimum": 0 },
+    "false_negative_count": { "type": "integer", "minimum": 0 },
+    "false_negative_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "full_matrix_fallback_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "platform_savings": { "type": "number", "minimum": 0, "maximum": 1 },
+    "flaky_failure_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "eligible_for_enforcement": { "type": "boolean" },
+    "diagnostics": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["code", "sample_id", "message"], "properties": { "code": { "enum": ["METRICS_SAMPLE_MISMATCH", "METRICS_INVALID"] }, "sample_id": { "type": "string" }, "message": { "type": "string" } } } }
+  }
+}

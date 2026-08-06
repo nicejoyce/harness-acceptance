@@ -1,0 +1,14 @@
+name: Tainted environment execution
+on:
+  pull_request_target:
+jobs:
+  prepare:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    env:
+      PR_SCRIPT: ${{ github.event.pull_request.body }}
+    steps:
+      - run: eval "$PR_SCRIPT"
+      - run: '& $env:PR_SCRIPT'
+      - run: echo "${{ github.head_ref }}"

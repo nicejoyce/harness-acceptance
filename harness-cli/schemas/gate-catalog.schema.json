@@ -1,37 +1,102 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["version", "gates"],
-  "properties": {
-    "version": { "const": 1 },
-    "gates": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["id", "severity", "kind", "evidence", "owner", "exception_allowed"],
-        "properties": {
-          "id": { "type": "string", "pattern": "^gate\\.[a-z0-9][a-z0-9.-]*$" },
-          "severity": { "enum": ["BLOCKER", "REQUIRED", "CONDITIONAL"] },
-          "kind": { "enum": ["command", "manual-review"] },
-          "command": { "type": "string", "minLength": 1 },
-          "evidence": { "type": "string", "minLength": 1 },
-          "owner": { "type": "string", "minLength": 1 },
-          "exception_allowed": { "type": "boolean" },
-          "depends_on": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+  "oneOf": [
+    { "$ref": "#/definitions/catalogV1" },
+    { "$ref": "#/definitions/catalogV2" }
+  ],
+  "definitions": {
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verifier_id", "scope", "rule_ids"],
+      "properties": {
+        "verifier_id": { "type": "string", "pattern": "^verifier\\.[a-z0-9][a-z0-9.-]*$" },
+        "scope": { "const": "rule-specific" },
+        "rule_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^[A-Z]+-[0-9]{3}$" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "gateV1": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "severity", "kind", "evidence", "owner", "exception_allowed"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^gate\\.[a-z0-9][a-z0-9.-]*$" },
+        "severity": { "enum": ["BLOCKER", "REQUIRED", "CONDITIONAL"] },
+        "kind": { "enum": ["command", "manual-review"] },
+        "command": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string", "minLength": 1 },
+        "exception_allowed": { "type": "boolean" },
+        "depends_on": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "command" } } },
+          "then": {
+            "properties": { "command": { "type": "string", "minLength": 1 } },
+            "required": ["command"]
+          }
         },
-        "allOf": [
-          {
-            "if": { "properties": { "kind": { "const": "command" } } },
-            "then": {
-              "properties": { "command": { "type": "string", "minLength": 1 } },
-              "required": ["command"]
-            }
-          },
-          { "if": { "properties": { "severity": { "const": "BLOCKER" } } }, "then": { "properties": { "exception_allowed": { "const": false } } } }
-        ]
+        {
+          "if": { "properties": { "severity": { "const": "BLOCKER" } } },
+          "then": { "properties": { "exception_allowed": { "const": false } } }
+        }
+      ]
+    },
+    "gateV2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "severity", "kind", "evidence", "owner", "exception_allowed"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^gate\\.[a-z0-9][a-z0-9.-]*$" },
+        "severity": { "enum": ["BLOCKER", "REQUIRED", "CONDITIONAL"] },
+        "kind": { "enum": ["command", "manual-review"] },
+        "command": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string", "minLength": 1 },
+        "exception_allowed": { "type": "boolean" },
+        "depends_on": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "verification": { "$ref": "#/definitions/verification" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "command" } } },
+          "then": {
+            "properties": { "command": { "type": "string", "minLength": 1 } },
+            "required": ["command"]
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "manual-review" } } },
+          "then": { "properties": { "verification": false } }
+        },
+        {
+          "if": { "properties": { "severity": { "const": "BLOCKER" } } },
+          "then": { "properties": { "exception_allowed": { "const": false } } }
+        }
+      ]
+    },
+    "catalogV1": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "gates"],
+      "properties": {
+        "version": { "const": 1 },
+        "gates": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/gateV1" } }
+      }
+    },
+    "catalogV2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "gates"],
+      "properties": {
+        "version": { "const": 2 },
+        "gates": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/gateV2" } }
       }
     }
   }

@@ -1,0 +1,10 @@
+version: 1
+preauthorized_install:
+  lockfile_unchanged: true
+  registry_allowlist:
+    - https://registry.npmjs.org
+  install_scripts: false
+  native_modules: false
+  network: false
+privileged_change_triggers: [manifest, lockfile, registry, install-scripts, native-modules, network]
+required_evidence: [lockfile-integrity, license, sbom, vulnerability-scan, install-script-scan]
