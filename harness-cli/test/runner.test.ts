@@ -120,7 +120,7 @@ test('executes trusted commands from a checkout bound to the plan base revision'
 
   assert.equal(manifest.result, 'passed');
   const log = await readFile(path.join(output, manifest.gates[0].log_path!), 'utf8');
-  assert.equal(log.trim(), await realpath(trustedRoot));
+  assert.equal(await realpath(log.trim()), await realpath(trustedRoot));
 });
 
 test('rejects trusted commands when the Harness checkout is not the plan base revision', async () => {
