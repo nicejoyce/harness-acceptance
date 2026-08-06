@@ -1,4 +1,5 @@
 import { execFile } from 'node:child_process';
+import { access } from 'node:fs/promises';
 import { promisify } from 'node:util';
 import path from 'node:path';
 
@@ -23,7 +24,19 @@ export async function changedFilesFromGit(root: string, base: string, head: stri
 }
 
 export async function gitRepositoryRoot(start: string): Promise<string> {
-  const { stdout } = await execFileAsync('git', ['-C', path.resolve(start), 'rev-parse', '--show-toplevel'], { windowsHide: true });
+  const resolvedStart = path.resolve(start);
+  let candidate = resolvedStart;
+  while (true) {
+    try {
+      await access(path.join(candidate, '.git'));
+      return candidate;
+    } catch {
+      const parent = path.dirname(candidate);
+      if (parent === candidate) break;
+      candidate = parent;
+    }
+  }
+  const { stdout } = await execFileAsync('git', ['-C', resolvedStart, 'rev-parse', '--show-toplevel'], { windowsHide: true });
   return path.resolve(stdout.trim());
 }
 
