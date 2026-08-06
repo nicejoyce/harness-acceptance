@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -120,7 +120,7 @@ test('executes trusted commands from a checkout bound to the plan base revision'
 
   assert.equal(manifest.result, 'passed');
   const log = await readFile(path.join(output, manifest.gates[0].log_path!), 'utf8');
-  assert.equal(log.trim(), trustedRoot);
+  assert.equal(log.trim(), await realpath(trustedRoot));
 });
 
 test('rejects trusted commands when the Harness checkout is not the plan base revision', async () => {
