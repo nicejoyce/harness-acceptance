@@ -192,8 +192,8 @@ test('canonical documentation describes the current trusted execution model', as
     const canonical = `${readme}\n${enforcement}\n${trustedExecution}`;
 
     assert.doesNotMatch(canonical, /gh attestation verify|provenance attestation|GitHub provenance attestation/i);
-    assert.doesNotMatch(canonical, /three `harness-\*`|?? `harness-\*`/i);
-    assert.doesNotMatch(canonical, /clean tracked worktree|??????????/i);
+    assert.doesNotMatch(canonical, /three `harness-\*`|三个 `harness-\*`/i);
+    assert.doesNotMatch(canonical, /clean tracked worktree|受跟踪工作区保持干净/i);
     assert.match(trustedExecution, /prepare-context[\s\S]+harness[\s\S]+harness-final/);
     assert.match(canonical, /HARNESS_ED25519_PRIVATE_KEY_B64/);
     assert.match(canonical, /HARNESS_ED25519_PUBLIC_KEYS_JSON/);
@@ -203,10 +203,10 @@ test('canonical documentation describes the current trusted execution model', as
     assert.match(canonical, /head_sha/);
     assert.match(canonical, /tracked[\s\S]+untracked[\s\S]+ignored/i);
     assert.match(canonical, /harness-final/);
-    assert.match(canonical, /two independent non-author CODEOWNER approvals|???????? CODEOWNER ??/);
+    assert.match(canonical, /two independent non-author CODEOWNER approvals|两名独立的非作者 CODEOWNER 审批/);
     assert.match(canonical, /user\.type/);
     assert.match(canonical, /Bot/);
-    assert.match(canonical, /identity snapshot|????/i);
+    assert.match(canonical, /identity snapshot|身份快照/i);
   }
 });
 

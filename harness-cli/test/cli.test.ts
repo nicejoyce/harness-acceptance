@@ -155,9 +155,26 @@ test('attestations agents preserves Bot reviews separately from approvals', () =
 
 test('coverage verify returns structured changed-line coverage diagnostics', () => {
   const output = mkdtempSync(path.join(tmpdir(), 'harness-coverage-cli-'));
+  const projectRoot = path.join(output, 'project');
+  mkdirSync(projectRoot);
+  mkdirSync(path.join(projectRoot, 'src'));
+  writeFileSync(path.join(projectRoot, 'src/example.ts'), 'export const one = 1;\n');
+  for (const args of [['init'], ['config', 'user.email', 'harness@example.test'], ['config', 'user.name', 'Harness Test'], ['add', '.'], ['commit', '-m', 'base']]) {
+    const git = spawnSync('git', args, { cwd: projectRoot, encoding: 'utf8' });
+    assert.equal(git.status, 0, `${git.stdout}\n${git.stderr}`);
+  }
+  const base = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: projectRoot, encoding: 'utf8' });
+  assert.equal(base.status, 0, `${base.stdout}\n${base.stderr}`);
+  writeFileSync(path.join(projectRoot, 'src/example.ts'), 'export const one = 2;\n');
+  for (const args of [['add', '.'], ['commit', '-m', 'head']]) {
+    const git = spawnSync('git', args, { cwd: projectRoot, encoding: 'utf8' });
+    assert.equal(git.status, 0, `${git.stdout}\n${git.stderr}`);
+  }
+  const head = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: projectRoot, encoding: 'utf8' });
+  assert.equal(head.status, 0, `${head.stdout}\n${head.stderr}`);
   const report = path.join(output, 'coverage.json');
   writeFileSync(report, '{}');
-  const result = spawnSync(process.execPath, [cli, 'coverage', 'verify', '--project-root', '.', '--base', 'HEAD~1', '--head', 'HEAD', '--report', report, '--json'], { encoding: 'utf8' });
+  const result = spawnSync(process.execPath, [cli, 'coverage', 'verify', '--project-root', projectRoot, '--base', base.stdout.trim(), '--head', head.stdout.trim(), '--report', report, '--json'], { encoding: 'utf8' });
   assert.notEqual(result.status, 0);
   assert.equal(JSON.parse(result.stdout).valid, false);
 });
