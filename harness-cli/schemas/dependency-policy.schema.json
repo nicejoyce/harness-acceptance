@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "preauthorized_install", "privileged_change_triggers", "required_evidence"],
+  "properties": {
+    "version": { "const": 1 },
+    "preauthorized_install": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lockfile_unchanged", "registry_allowlist", "install_scripts", "native_modules", "network"],
+      "properties": {
+        "lockfile_unchanged": { "const": true },
+        "registry_allowlist": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^https://" }, "uniqueItems": true },
+        "install_scripts": { "const": false },
+        "native_modules": { "const": false },
+        "network": { "const": false }
+      }
+    },
+    "privileged_change_triggers": { "type": "array", "minItems": 1, "items": { "enum": ["manifest", "lockfile", "registry", "install-scripts", "native-modules", "network"] }, "uniqueItems": true },
+    "required_evidence": { "type": "array", "minItems": 1, "items": { "enum": ["lockfile-integrity", "license", "sbom", "vulnerability-scan", "install-script-scan"] }, "uniqueItems": true }
+  }
+}

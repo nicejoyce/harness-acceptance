@@ -1,37 +1,81 @@
-version: 1
+version: 2
 routes:
-  - id: route.default
-    include: ['**/*']
-    rules: [ARCH-001, ARCH-002, ARCH-003, ARCH-004, ARCH-005, ARCH-006, ARCH-008, TEST-001, TEST-002, TEST-003, TEST-005, TEST-006, TEST-007, TEST-008, TEST-009, DOC-001, DOC-002, DOC-004, DOC-005, DOC-006, AI-001, AI-004, AI-005, AI-006, AI-007, AI-008]
-    gates: [gate.format, gate.lint, gate.typecheck, gate.unit-test, gate.build, gate.peer-review]
-    approvals: [engineering]
+  - id: route.baseline
+    include: ['.harness-baseline-never']
+    risk_tier: low
+    fallback: false
+    rules: [ARCH-001, ARCH-002, ARCH-003, ARCH-004, ARCH-005, ARCH-006, ARCH-008, TEST-001, TEST-002, TEST-003, TEST-005, TEST-006, TEST-007, TEST-008, TEST-009, DOC-002, DOC-004, DOC-005, DOC-006, AI-001, AI-005, AI-006, AI-007, AI-008]
+    gates: [gate.format, gate.lint, gate.typecheck, gate.unit-test, gate.changed-line-coverage, gate.build]
+    approvals: []
+  - id: route.low-risk
+    extends: route.baseline
+    include: ['src/**/*.{c,cc,cpp,cs,go,java,js,jsx,mjs,py,rb,rs,ts,tsx}', 'test/**/*', 'tests/**/*', 'docs/**/*.md', 'README*']
+    risk_tier: low
+    fallback: false
+    rules: []
+    gates: []
+    approvals: []
+  - id: route.harness-self
+    extends: route.baseline
+    include: ['.github/workflows/**', 'CODEOWNERS*', 'harness/**', 'harness-zh/**', 'harness-cli/**', 'harness-service/**', 'package.json', 'package-lock.json', 'stryker.config.json', 'stryker.full.config.json', 'scripts/**']
+    risk_tier: critical
+    fallback: false
+    rules: [SEC-009]
+    gates: [gate.control-plane-integrity, gate.regression-proof, gate.incremental-mutation, gate.peer-review]
+    approvals: [security, platform]
   - id: route.security
+    extends: route.baseline
     include: ['**/auth/**', '**/security/**', '**/*credential*', '**/*secret*']
+    risk_tier: critical
+    fallback: false
     rules: [SEC-001, SEC-002, SEC-003, SEC-004, SEC-005, SEC-006, SEC-007, ARCH-007, UI-001, DEP-003, AI-002, AI-003]
-    gates: [gate.security-scan, gate.integration-test, gate.peer-review, gate.lint, gate.typecheck, gate.e2e-test, gate.build]
+    gates: [gate.security-scan, gate.integration-test, gate.e2e-test, gate.regression-proof, gate.incremental-mutation, gate.peer-review]
     approvals: [security]
   - id: route.data
+    extends: route.baseline
     include: ['**/migrations/**', '**/schema/**', '**/database/**', '**/*migration*']
+    risk_tier: high
+    fallback: false
     rules: [DATA-001, DATA-002, DATA-003, DATA-004, DATA-005, DATA-006, DATA-007, DATA-008]
-    gates: [gate.security-scan, gate.integration-test, gate.migration-review]
+    gates: [gate.security-scan, gate.integration-test, gate.regression-proof, gate.migration-review]
     approvals: [data]
   - id: route.api
+    extends: route.baseline
     include: ['**/api/**', '**/contracts/**', '**/*openapi*']
+    risk_tier: high
+    fallback: false
     rules: [BOUND-001, BOUND-002, BOUND-003, BOUND-004, BOUND-005, BOUND-006, BOUND-007, API-001, API-002, API-003, API-004, API-005, API-006]
-    gates: [gate.security-scan, gate.integration-test, gate.peer-review]
+    gates: [gate.security-scan, gate.integration-test, gate.regression-proof, gate.peer-review]
     approvals: [api]
   - id: route.ui
+    extends: route.baseline
     include: ['**/ui/**', '**/frontend/**', '**/components/**']
+    risk_tier: medium
+    fallback: false
     rules: [UI-002, UI-003, UI-004, UI-005, UI-006, UI-007, TEST-004]
-    gates: [gate.e2e-test, gate.peer-review, gate.unit-test]
+    gates: [gate.e2e-test, gate.peer-review]
     approvals: [frontend]
   - id: route.operations
+    extends: route.baseline
     include: ['**/.github/**', '**/deploy/**', '**/infra/**', '**/Dockerfile*']
+    risk_tier: critical
+    fallback: false
     rules: [DEP-001, DEP-002, DEP-004, DEP-005, DEP-006, DEP-007, DEP-008, OPS-001, OPS-002, OPS-003, OPS-004, OPS-005, OPS-006, OPS-007]
-    gates: [gate.security-scan, gate.build, gate.release-review, gate.peer-review]
+    gates: [gate.security-scan, gate.regression-proof, gate.incremental-mutation, gate.build, gate.release-review, gate.peer-review]
     approvals: [platform, sre]
   - id: route.privacy
+    extends: route.baseline
     include: ['**/telemetry/**', '**/analytics/**', '**/*privacy*']
+    risk_tier: high
+    fallback: false
     rules: [SEC-008, DOC-003, DOC-007]
     gates: [gate.privacy-review, gate.peer-review, gate.security-scan]
     approvals: [data, security]
+  - id: route.unknown
+    extends: route.baseline
+    include: ['**/*']
+    risk_tier: high
+    fallback: true
+    rules: [DOC-001, AI-004]
+    gates: [gate.peer-review]
+    approvals: []

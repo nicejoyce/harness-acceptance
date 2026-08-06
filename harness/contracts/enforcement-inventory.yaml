@@ -1,0 +1,523 @@
+version: 1
+rules:
+  - id: SEC-001
+    mode: human-attested
+    attestation_policy_id: attestation.sec-001
+    evidence_type: rule-attestation
+    owner: security
+    implementation_status: implemented
+    known_gap: null
+  - id: SEC-002
+    mode: human-attested
+    attestation_policy_id: attestation.sec-002
+    evidence_type: rule-attestation
+    owner: security
+    implementation_status: implemented
+    known_gap: null
+  - id: SEC-003
+    mode: human-attested
+    attestation_policy_id: attestation.sec-003
+    evidence_type: rule-attestation
+    owner: security
+    implementation_status: implemented
+    known_gap: null
+  - id: SEC-004
+    mode: advisory
+    evidence_type: none
+    owner: security
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: SEC-005
+    mode: advisory
+    evidence_type: none
+    owner: security
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: SEC-006
+    mode: advisory
+    evidence_type: none
+    owner: security
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: SEC-007
+    mode: advisory
+    evidence_type: none
+    owner: security
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: SEC-008
+    mode: advisory
+    evidence_type: none
+    owner: security
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: SEC-009
+    mode: machine-enforced
+    verifier_gate_ids:
+      - gate.control-plane-integrity
+    evidence_type: control-plane-report
+    owner: security
+    implementation_status: implemented
+    known_gap: null
+  - id: DATA-001
+    mode: human-attested
+    attestation_policy_id: attestation.data-001
+    evidence_type: rule-attestation
+    owner: data
+    implementation_status: implemented
+    known_gap: null
+  - id: DATA-002
+    mode: human-attested
+    attestation_policy_id: attestation.data-002
+    evidence_type: rule-attestation
+    owner: data
+    implementation_status: implemented
+    known_gap: null
+  - id: DATA-003
+    mode: advisory
+    evidence_type: none
+    owner: data
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DATA-004
+    mode: advisory
+    evidence_type: none
+    owner: data
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DATA-005
+    mode: human-attested
+    attestation_policy_id: attestation.data-005
+    evidence_type: rule-attestation
+    owner: data
+    implementation_status: implemented
+    known_gap: null
+  - id: DATA-006
+    mode: advisory
+    evidence_type: none
+    owner: data
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DATA-007
+    mode: advisory
+    evidence_type: none
+    owner: data
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DATA-008
+    mode: advisory
+    evidence_type: none
+    owner: data
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: BOUND-001
+    mode: advisory
+    evidence_type: none
+    owner: backend
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: BOUND-002
+    mode: advisory
+    evidence_type: none
+    owner: backend
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: BOUND-003
+    mode: advisory
+    evidence_type: none
+    owner: backend
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: BOUND-004
+    mode: advisory
+    evidence_type: none
+    owner: backend
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: BOUND-005
+    mode: human-attested
+    attestation_policy_id: attestation.bound-005
+    evidence_type: rule-attestation
+    owner: backend
+    implementation_status: implemented
+    known_gap: null
+  - id: BOUND-006
+    mode: human-attested
+    attestation_policy_id: attestation.bound-006
+    evidence_type: rule-attestation
+    owner: backend
+    implementation_status: implemented
+    known_gap: null
+  - id: BOUND-007
+    mode: advisory
+    evidence_type: none
+    owner: backend
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: ARCH-001
+    mode: advisory
+    evidence_type: none
+    owner: architecture
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: ARCH-002
+    mode: advisory
+    evidence_type: none
+    owner: architecture
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: ARCH-003
+    mode: advisory
+    evidence_type: none
+    owner: architecture
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: ARCH-004
+    mode: advisory
+    evidence_type: none
+    owner: architecture
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: ARCH-005
+    mode: advisory
+    evidence_type: none
+    owner: architecture
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: ARCH-006
+    mode: advisory
+    evidence_type: none
+    owner: architecture
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: ARCH-007
+    mode: human-attested
+    attestation_policy_id: attestation.arch-007
+    evidence_type: rule-attestation
+    owner: architecture
+    implementation_status: implemented
+    known_gap: null
+  - id: ARCH-008
+    mode: advisory
+    evidence_type: none
+    owner: architecture
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: API-001
+    mode: advisory
+    evidence_type: none
+    owner: api
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: API-002
+    mode: advisory
+    evidence_type: none
+    owner: api
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: API-003
+    mode: advisory
+    evidence_type: none
+    owner: api
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: API-004
+    mode: advisory
+    evidence_type: none
+    owner: api
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: API-005
+    mode: advisory
+    evidence_type: none
+    owner: api
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: API-006
+    mode: advisory
+    evidence_type: none
+    owner: api
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: UI-001
+    mode: human-attested
+    attestation_policy_id: attestation.ui-001
+    evidence_type: rule-attestation
+    owner: frontend
+    implementation_status: implemented
+    known_gap: null
+  - id: UI-002
+    mode: advisory
+    evidence_type: none
+    owner: frontend
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: UI-003
+    mode: advisory
+    evidence_type: none
+    owner: frontend
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: UI-004
+    mode: advisory
+    evidence_type: none
+    owner: frontend
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: UI-005
+    mode: advisory
+    evidence_type: none
+    owner: frontend
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: UI-006
+    mode: advisory
+    evidence_type: none
+    owner: frontend
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: UI-007
+    mode: advisory
+    evidence_type: none
+    owner: frontend
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: TEST-001
+    mode: advisory
+    evidence_type: none
+    owner: quality
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: TEST-002
+    mode: advisory
+    evidence_type: none
+    owner: quality
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: TEST-003
+    mode: advisory
+    evidence_type: none
+    owner: quality
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: TEST-004
+    mode: advisory
+    evidence_type: none
+    owner: quality
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: TEST-005
+    mode: advisory
+    evidence_type: none
+    owner: quality
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: TEST-006
+    mode: advisory
+    evidence_type: none
+    owner: quality
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: TEST-007
+    mode: advisory
+    evidence_type: none
+    owner: quality
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: TEST-008
+    mode: advisory
+    evidence_type: none
+    owner: quality
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: TEST-009
+    mode: advisory
+    evidence_type: none
+    owner: quality
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DEP-001
+    mode: advisory
+    evidence_type: none
+    owner: platform
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DEP-002
+    mode: advisory
+    evidence_type: none
+    owner: platform
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DEP-003
+    mode: human-attested
+    attestation_policy_id: attestation.dep-003
+    evidence_type: rule-attestation
+    owner: platform
+    implementation_status: implemented
+    known_gap: null
+  - id: DEP-004
+    mode: advisory
+    evidence_type: none
+    owner: platform
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DEP-005
+    mode: advisory
+    evidence_type: none
+    owner: platform
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DEP-006
+    mode: advisory
+    evidence_type: none
+    owner: platform
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DEP-007
+    mode: advisory
+    evidence_type: none
+    owner: platform
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DEP-008
+    mode: advisory
+    evidence_type: none
+    owner: platform
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: OPS-001
+    mode: advisory
+    evidence_type: none
+    owner: sre
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: OPS-002
+    mode: advisory
+    evidence_type: none
+    owner: sre
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: OPS-003
+    mode: advisory
+    evidence_type: none
+    owner: sre
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: OPS-004
+    mode: advisory
+    evidence_type: none
+    owner: sre
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: OPS-005
+    mode: advisory
+    evidence_type: none
+    owner: sre
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: OPS-006
+    mode: human-attested
+    attestation_policy_id: attestation.ops-006
+    evidence_type: rule-attestation
+    owner: sre
+    implementation_status: implemented
+    known_gap: null
+  - id: OPS-007
+    mode: advisory
+    evidence_type: none
+    owner: sre
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DOC-001
+    mode: human-attested
+    attestation_policy_id: attestation.doc-001
+    evidence_type: rule-attestation
+    owner: technical-lead
+    implementation_status: implemented
+    known_gap: null
+  - id: DOC-002
+    mode: advisory
+    evidence_type: none
+    owner: technical-lead
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DOC-003
+    mode: advisory
+    evidence_type: none
+    owner: technical-lead
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DOC-004
+    mode: advisory
+    evidence_type: none
+    owner: technical-lead
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DOC-005
+    mode: advisory
+    evidence_type: none
+    owner: technical-lead
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DOC-006
+    mode: advisory
+    evidence_type: none
+    owner: technical-lead
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: DOC-007
+    mode: advisory
+    evidence_type: none
+    owner: technical-lead
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: AI-001
+    mode: advisory
+    evidence_type: none
+    owner: agent-user
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: AI-002
+    mode: human-attested
+    attestation_policy_id: attestation.ai-002
+    evidence_type: rule-attestation
+    owner: agent-user
+    implementation_status: implemented
+    known_gap: null
+  - id: AI-003
+    mode: advisory
+    evidence_type: none
+    owner: agent-user
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: AI-004
+    mode: human-attested
+    attestation_policy_id: attestation.ai-004
+    evidence_type: rule-attestation
+    owner: agent-user
+    implementation_status: implemented
+    known_gap: null
+  - id: AI-005
+    mode: advisory
+    evidence_type: none
+    owner: agent-user
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: AI-006
+    mode: advisory
+    evidence_type: none
+    owner: agent-user
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: AI-007
+    mode: advisory
+    evidence_type: none
+    owner: agent-user
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.
+  - id: AI-008
+    mode: advisory
+    evidence_type: none
+    owner: agent-user
+    implementation_status: unverifiable
+    known_gap: No reliable rule-specific verifier or structured attestation is implemented.

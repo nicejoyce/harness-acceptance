@@ -1,0 +1,13 @@
+name: Local project execution
+on:
+  pull_request_target:
+jobs:
+  inspect:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./project/.github/actions/pwn
+      - run: ./project/pwn.sh
+      - run: bash < project/pwn.sh
+      - run: node -e "$(cat project/pwn.js)"

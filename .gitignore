@@ -3,6 +3,7 @@ node_modules/
 .harness-test/
 fixtures/**/.harness-test/
 coverage/
+reports/
 dist/
 *.log
 .env

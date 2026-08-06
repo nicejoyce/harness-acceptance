@@ -65,6 +65,24 @@ function validDocuments(): Documents {
   };
 }
 
+function validV4Documents(): Documents {
+  const documents = validDocuments();
+  documents.gates.version = 2;
+  const gate = (documents.gates.gates as Array<Record<string, unknown>>)[0];
+  gate.verification = {
+    verifier_id: 'verifier.test-001',
+    scope: 'rule-specific',
+    rule_ids: ['TEST-001'],
+  };
+  documents.registry.version = 4;
+  const rule = (documents.registry.rules as Array<Record<string, unknown>>)[0];
+  rule.enforcement = {
+    mode: 'machine-enforced',
+    verifier_gate_ids: ['gate.unit-test'],
+  };
+  return documents;
+}
+
 async function writeDocuments(documents: Documents): Promise<string> {
   const root = await mkdtemp(path.join(tmpdir(), 'harness-contracts-'));
   await Promise.all([
@@ -85,6 +103,105 @@ test('accepts a valid canonical contract bundle', async () => {
   const root = await writeDocuments(validDocuments());
   const result = await validateContracts(root);
   assert.equal(result.valid, true, JSON.stringify(result.diagnostics));
+});
+
+test('accepts a valid v4 enforcement contract bundle', async () => {
+  const result = await validateContracts(await writeDocuments(validV4Documents()));
+  assert.equal(result.valid, true, JSON.stringify(result.diagnostics));
+});
+
+test('requires enforcement declarations on every v4 rule', async () => {
+  const documents = validV4Documents();
+  delete (documents.registry.rules as Array<Record<string, unknown>>)[0].enforcement;
+  const result = await validateContracts(await writeDocuments(documents));
+  assert.ok(result.diagnostics.some((item) => item.code === 'SCHEMA_INVALID' && item.document === 'rules/registry.yaml'));
+});
+
+test('rejects advisory BLOCKER rules', async () => {
+  const documents = validV4Documents();
+  const rule = (documents.registry.rules as Array<Record<string, unknown>>)[0];
+  rule.severity = 'BLOCKER';
+  rule.exception_allowed = false;
+  rule.gates = [];
+  rule.enforcement = { mode: 'advisory' };
+  const result = await validateContracts(await writeDocuments(documents));
+  assert.ok(result.diagnostics.some((item) => item.code === 'ENFORCEMENT_INVALID' && item.message.includes('BLOCKER')));
+});
+
+test('rejects machine-enforced rules without verifier gates', async () => {
+  const documents = validV4Documents();
+  (documents.registry.rules as Array<Record<string, unknown>>)[0].enforcement = { mode: 'machine-enforced' };
+  const result = await validateContracts(await writeDocuments(documents));
+  assert.ok(result.diagnostics.some((item) => item.code === 'SCHEMA_INVALID' && item.message.includes('verifier_gate_ids')));
+});
+
+test('rejects manual-review gates used as machine verifiers', async () => {
+  const documents = validV4Documents();
+  const gate = (documents.gates.gates as Array<Record<string, unknown>>)[0];
+  gate.kind = 'manual-review';
+  delete gate.command;
+  delete gate.verification;
+  const result = await validateContracts(await writeDocuments(documents));
+  assert.ok(result.diagnostics.some((item) => item.code === 'ENFORCEMENT_INVALID' && item.message.includes('command gate')));
+});
+
+test('rejects verification metadata on manual-review gates', async () => {
+  const documents = validV4Documents();
+  const gate = (documents.gates.gates as Array<Record<string, unknown>>)[0];
+  gate.kind = 'manual-review';
+  delete gate.command;
+  const result = await validateContracts(await writeDocuments(documents));
+  assert.ok(result.diagnostics.some((item) => item.code === 'SCHEMA_INVALID' && item.document === 'contracts/gate-catalog.yaml'));
+});
+
+test('requires gate catalog v2 for a v4 rule registry', async () => {
+  const documents = validV4Documents();
+  documents.gates.version = 1;
+  delete (documents.gates.gates as Array<Record<string, unknown>>)[0].verification;
+  const result = await validateContracts(await writeDocuments(documents));
+  assert.ok(result.diagnostics.some((item) => item.code === 'ENFORCEMENT_INVALID' && item.message.includes('gate catalog v2')));
+});
+
+test('rejects verifier gates that are not selected by the rule', async () => {
+  const documents = validV4Documents();
+  (documents.registry.rules as Array<Record<string, unknown>>)[0].gates = [];
+  const result = await validateContracts(await writeDocuments(documents));
+  assert.ok(result.diagnostics.some((item) => item.code === 'ENFORCEMENT_INVALID' && item.message.includes('must select verifier gate')));
+});
+
+test('rejects verifier metadata that does not bind the verified rule', async () => {
+  const documents = validV4Documents();
+  const gate = (documents.gates.gates as Array<Record<string, unknown>>)[0];
+  gate.verification = {
+    verifier_id: 'verifier.other-001',
+    scope: 'rule-specific',
+    rule_ids: ['OTHER-001'],
+  };
+  const result = await validateContracts(await writeDocuments(documents));
+  assert.ok(result.diagnostics.some((item) => item.code === 'ENFORCEMENT_INVALID' && item.message.includes('does not declare rule')));
+});
+
+test('rejects gate verification declarations not referenced by the declared rule', async () => {
+  const documents = validV4Documents();
+  const rule = (documents.registry.rules as Array<Record<string, unknown>>)[0];
+  rule.enforcement = { mode: 'human-attested', attestation_policy_id: 'attestation.test-001' };
+  const result = await validateContracts(await writeDocuments(documents));
+  assert.ok(result.diagnostics.some((item) => item.code === 'ENFORCEMENT_INVALID' && item.message.includes('is not referenced by rule')));
+});
+
+test('requires an attestation policy for human-attested rules', async () => {
+  const documents = validV4Documents();
+  (documents.registry.rules as Array<Record<string, unknown>>)[0].enforcement = { mode: 'human-attested' };
+  const result = await validateContracts(await writeDocuments(documents));
+  assert.ok(result.diagnostics.some((item) => item.code === 'SCHEMA_INVALID' && item.message.includes('attestation_policy_id')));
+});
+
+test('rejects advisory rules that still select blocking gates', async () => {
+  const documents = validV4Documents();
+  const rule = (documents.registry.rules as Array<Record<string, unknown>>)[0];
+  rule.enforcement = { mode: 'advisory' };
+  const result = await validateContracts(await writeDocuments(documents));
+  assert.ok(result.diagnostics.some((item) => item.code === 'ENFORCEMENT_INVALID' && item.message.includes('cannot select blocking gates')));
 });
 
 test('rejects an empty project profile', async () => {
@@ -143,6 +260,17 @@ test('rejects sensitive environment values embedded in the project profile', asy
   command.sensitive_environment = ['API_TOKEN'];
   const result = await validateContracts(await writeDocuments(documents));
   assert.ok(result.diagnostics.some((item) => item.code === 'SENSITIVE_VALUE_INLINE'));
+});
+
+test('accepts only explicit project or trusted Harness command roots', async () => {
+  const trusted = validDocuments();
+  (trusted.profile.commands as Record<string, Record<string, unknown>>)['unit-test'].execution_root = 'trusted-harness';
+  assert.equal((await validateContracts(await writeDocuments(trusted))).valid, true);
+
+  const invalid = validDocuments();
+  (invalid.profile.commands as Record<string, Record<string, unknown>>)['unit-test'].execution_root = 'pull-request-controlled';
+  const result = await validateContracts(await writeDocuments(invalid));
+  assert.ok(result.diagnostics.some((item) => item.code === 'SCHEMA_INVALID'));
 });
 
 test('rejects a route that omits a gate required by one of its rules', async () => {

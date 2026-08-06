@@ -17,6 +17,7 @@ const cli = path.resolve('harness-cli/src/cli.ts');
 test('aggregates, signs, and verifies a final result through the CLI', async () => {
   const projectRoot = await mkdtemp(path.join(tmpdir(), 'harness-final-project-'));
   await cp(path.resolve('fixtures/neutral-project'), projectRoot, { recursive: true });
+  await writeFile(path.join(projectRoot, 'contracts/platform-policy.yaml'), JSON.stringify({ version: 1, mode: 'enforce', platforms: { linux: { runner: 'ubuntu-latest' }, win32: { runner: 'windows-latest' }, darwin: { runner: 'macos-latest' } }, baseline_platforms: [process.platform], full_matrix: ['linux', 'win32', 'darwin'], full_matrix_operations: ['release'], full_matrix_route_ids: ['route.unknown'], rules: [] }));
   const bundle = await loadContracts(projectRoot);
   const classification = classifyChanges(bundle, { changed_files: ['src/example.txt'], operation: 'merge', target_environment: 'test' });
   const plan = await createPlan(bundle, classification, []);
@@ -24,6 +25,8 @@ test('aggregates, signs, and verifies a final result through the CLI', async () 
   await runPlan(bundle, plan, { output_dir: evidenceRoot });
   const approvalsPath = path.join(evidenceRoot, 'expected-approvals.json');
   await writeFile(approvalsPath, '[]\n');
+  const ruleAttestationsPath = path.join(evidenceRoot, 'expected-rule-attestations.json');
+  await writeFile(ruleAttestationsPath, '[]\n');
   const signedPath = path.join(evidenceRoot, 'final.signed.json');
   const keys = generateKeyPairSync('ed25519');
   const env = {
@@ -32,7 +35,7 @@ test('aggregates, signs, and verifies a final result through the CLI', async () 
     HARNESS_ED25519_PUBLIC_KEY_B64: exportEd25519PublicKey(keys.publicKey),
   };
 
-  const aggregate = spawnSync(process.execPath, [cli, 'final', 'aggregate', '--root', projectRoot, '--project-root', projectRoot, '--manifest', path.join(evidenceRoot, 'manifest.json'), '--expected-approvals', approvalsPath, '--job-conclusion', 'success', '--output', signedPath], { encoding: 'utf8', env });
+  const aggregate = spawnSync(process.execPath, [cli, 'final', 'aggregate', '--root', projectRoot, '--project-root', projectRoot, '--manifest', path.join(evidenceRoot, 'manifest.json'), '--expected-approvals', approvalsPath, '--expected-rule-attestations', ruleAttestationsPath, '--job-conclusion', 'success', '--output', signedPath], { encoding: 'utf8', env });
   assert.equal(aggregate.status, 0, `${aggregate.stdout}\n${aggregate.stderr}`);
   const envelope = JSON.parse(await readFile(signedPath, 'utf8')) as { payload: { check_name: string; result: string } };
   assert.deepEqual(envelope.payload, { ...envelope.payload, check_name: 'harness-final', result: 'passed' });
@@ -67,7 +70,14 @@ test('final verification selects the external trust anchor by key ID', async () 
     check_name: 'harness-final',
     job_conclusion: 'success',
     plan_sha256: 'c'.repeat(64),
+    expected_platforms: ['linux'],
+    execution_platforms: ['linux'],
+    platform_reason_codes: ['platform.baseline'],
+    fallback_full_matrix: false,
+    platform_mode: 'enforce',
     evidence: [{ platform: 'linux', manifest_sha256: 'd'.repeat(64), result: 'passed' }],
+    approvals: [],
+    thresholds: [],
     result: 'passed',
   }, exportEd25519PrivateKey(signing.privateKey));
   await writeFile(input, JSON.stringify(envelope));

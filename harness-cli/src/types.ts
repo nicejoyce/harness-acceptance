@@ -4,6 +4,7 @@ export interface CommandDescriptor {
   executable: string;
   args: string[];
   cwd: string;
+  execution_root?: 'project' | 'trusted-harness';
   timeout_seconds: number;
   environment?: Record<string, string>;
   inherited_environment?: string[];
@@ -30,17 +31,32 @@ export interface GateDefinition {
   owner: string;
   exception_allowed: boolean;
   depends_on?: string[];
+  verification?: {
+    verifier_id: string;
+    scope: 'rule-specific';
+    rule_ids: string[];
+  };
 }
 
-export interface GateCatalog {
-  version: number;
+export interface LegacyGateCatalog {
+  version: 1;
   gates: GateDefinition[];
 }
+
+export interface VerifiedGateCatalog {
+  version: 2;
+  gates: GateDefinition[];
+}
+
+export type GateCatalog = LegacyGateCatalog | VerifiedGateCatalog;
 
 export interface RouteDefinition {
   id: string;
   include: string[];
   exclude?: string[];
+  extends?: string;
+  risk_tier?: RiskTier;
+  fallback?: boolean;
   rules: string[];
   gates: string[];
   approvals: string[];
@@ -51,7 +67,9 @@ export interface RouteCatalog {
   routes: RouteDefinition[];
 }
 
-export interface RuleDefinition {
+export type RiskTier = 'low' | 'medium' | 'high' | 'critical';
+
+interface RuleDefinitionBase {
   id: string;
   module: string;
   severity: Severity;
@@ -59,11 +77,34 @@ export interface RuleDefinition {
   exception_allowed: boolean;
 }
 
-export interface RuleRegistry {
-  version: number;
-  modules: Record<string, { prefix: string; owner: string }>;
-  rules: RuleDefinition[];
+export interface LegacyRuleDefinition extends RuleDefinitionBase {
+  enforcement?: never;
 }
+
+export type RuleEnforcement =
+  | { mode: 'machine-enforced'; verifier_gate_ids: string[] }
+  | { mode: 'human-attested'; attestation_policy_id: string }
+  | { mode: 'advisory' };
+
+export interface EnforcedRuleDefinition extends RuleDefinitionBase {
+  enforcement: RuleEnforcement;
+}
+
+export type RuleDefinition = LegacyRuleDefinition | EnforcedRuleDefinition;
+
+export interface LegacyRuleRegistry {
+  version: 3;
+  modules: Record<string, { prefix: string; owner: string }>;
+  rules: LegacyRuleDefinition[];
+}
+
+export interface EnforcedRuleRegistry {
+  version: 4;
+  modules: Record<string, { prefix: string; owner: string }>;
+  rules: EnforcedRuleDefinition[];
+}
+
+export type RuleRegistry = LegacyRuleRegistry | EnforcedRuleRegistry;
 
 export interface ContractBundle {
   root: string;
@@ -89,6 +130,7 @@ export interface Classification {
   risk_labels: string[];
   operation: ClassificationInput['operation'];
   target_environment: string;
+  risk_tier: RiskTier;
 }
 
 export interface ExecutionContext {
@@ -129,6 +171,41 @@ export interface ApprovalRecord {
   expires_at: string;
 }
 
+export type GitHubUserType = 'User' | 'Bot' | 'Organization' | 'App';
+export type IdentityApiSource = 'github-organization-membership' | 'github-repository-collaborator-permission';
+
+export interface IdentitySubject {
+  login: string;
+  user_type: GitHubUserType;
+  affiliation_state: 'active' | 'inactive';
+  api_source: IdentityApiSource;
+  queried_at: string;
+}
+
+export interface IdentitySnapshot {
+  version: 1;
+  repository: string;
+  pull_request: number;
+  commit_sha: string;
+  author: string;
+  captured_at: string;
+  subjects: IdentitySubject[];
+}
+
+export interface AgentAttestationRecord {
+  id: string;
+  actor: string;
+  actor_type: Exclude<GitHubUserType, 'User'>;
+  source: 'github-review';
+  repository: string;
+  pull_request: number;
+  commit_sha: string;
+  review_id: number;
+  review_state: string;
+  body_sha256: string;
+  attested_at: string;
+}
+
 export interface PlannedGate {
   id: string;
   severity: Severity;
@@ -141,8 +218,52 @@ export interface PlannedGate {
   approval_digest?: string;
 }
 
+export interface RuleAttestationPolicy {
+  id: string;
+  rule_ids: string[];
+  roles: string[];
+  checklist_version: string;
+  required_claims: string[];
+}
+
+export interface RuleAttestationPolicyCatalog {
+  version: 1;
+  policies: RuleAttestationPolicy[];
+}
+
+export interface PlannedRuleAttestation {
+  policy_id: string;
+  rule_ids: string[];
+  roles: string[];
+  checklist_version: string;
+  required_claims: string[];
+}
+
+export interface RuleAttestationRecord {
+  id: string;
+  policy_id: string;
+  rule_ids: string[];
+  role: string;
+  approver: string;
+  source: 'github-review';
+  repository: string;
+  pull_request: number;
+  commit_sha: string;
+  checklist_version: string;
+  claims: string[];
+  review_id: number;
+  attested_at: string;
+}
+
 export interface ExecutionPlan {
   version: 1;
+  lane: 'fast' | 'full';
+  risk_tier: RiskTier;
+  expected_platforms: Array<'linux' | 'win32' | 'darwin'>;
+  execution_platforms: Array<'linux' | 'win32' | 'darwin'>;
+  platform_reason_codes: string[];
+  fallback_full_matrix: boolean;
+  platform_mode: 'shadow' | 'enforce' | 'fallback';
   context: ExecutionContext | null;
   source_base_revision: string | null;
   source_revision: string | null;
@@ -151,6 +272,8 @@ export interface ExecutionPlan {
   changed_files: string[];
   risk_labels: string[];
   route_ids: string[];
+  rule_ids: string[];
+  rule_attestations: PlannedRuleAttestation[];
   approvals: string[];
   gates: PlannedGate[];
 }
@@ -190,6 +313,8 @@ export interface CiProvenance {
 
 export interface EvidenceManifest {
   version: 1;
+  lane: 'fast' | 'full';
+  risk_tier: RiskTier;
   harness_version: string;
   run_id: string;
   repository_root: string;
@@ -209,6 +334,8 @@ export interface EvidenceManifest {
   exceptions_sha256: string;
   approvals_path: string;
   approvals_sha256: string;
+  rule_attestations_path: string;
+  rule_attestations_sha256: string;
   started_at: string;
   ended_at: string;
   gates: GateEvidence[];

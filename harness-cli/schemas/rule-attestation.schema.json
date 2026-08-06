@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "policy_id", "rule_ids", "role", "approver", "source", "repository", "pull_request", "commit_sha", "checklist_version", "claims", "review_id", "attested_at"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^RAT-GH-[0-9]+-attestation\\.[a-z0-9][a-z0-9.-]*$" },
+    "policy_id": { "type": "string", "pattern": "^attestation\\.[a-z0-9][a-z0-9.-]*$" },
+    "rule_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^[A-Z]+-[0-9]{3}$" }, "uniqueItems": true },
+    "role": { "type": "string", "minLength": 1 },
+    "approver": { "type": "string", "minLength": 1 },
+    "source": { "const": "github-review" },
+    "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+    "pull_request": { "type": "integer", "minimum": 1 },
+    "commit_sha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+    "checklist_version": { "type": "string", "minLength": 1 },
+    "claims": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "review_id": { "type": "integer", "minimum": 1 },
+    "attested_at": { "type": "string", "minLength": 1 }
+  }
+}

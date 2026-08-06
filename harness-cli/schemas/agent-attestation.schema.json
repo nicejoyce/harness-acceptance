@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "actor", "actor_type", "source", "repository", "pull_request", "commit_sha", "review_id", "review_state", "body_sha256", "attested_at"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^AGT-GH-[1-9][0-9]*$" },
+    "actor": { "type": "string", "minLength": 1 },
+    "actor_type": { "enum": ["Bot", "Organization", "App"] },
+    "source": { "const": "github-review" },
+    "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+    "pull_request": { "type": "integer", "minimum": 1 },
+    "commit_sha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+    "review_id": { "type": "integer", "minimum": 1 },
+    "review_state": { "type": "string", "minLength": 1 },
+    "body_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "attested_at": { "type": "string", "minLength": 1 }
+  }
+}

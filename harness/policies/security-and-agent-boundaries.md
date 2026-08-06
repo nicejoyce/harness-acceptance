@@ -4,7 +4,7 @@
 
 Allowed by default: local read-only inspection, static analysis, and tests that use isolated local fixtures with no external side effects.
 
-Approval required before execution: network probing beyond an approved allowlist; production or staging access; credential use; changes to CI, deployment, authentication, authorization, database schema, or public contracts; processing personal or customer data; installation of runtime dependencies; deletion, overwrite, reset, migration, or other destructive actions.
+Approval required before execution: network probing beyond an approved allowlist; production or staging access; credential use; changes to CI, deployment, authentication, authorization, database schema, public contracts, or dependency capability; processing personal or customer data; installation of unreviewed runtime dependencies; deletion, overwrite, reset, migration, or other destructive actions. A repeat install of an unchanged reviewed lockfile is preauthorized only under the dependency policy.
 
 Never perform: credential or private-key disclosure; authentication bypass; account farming; identity/device evasion; circumvention of rate limits, anti-abuse controls, or platform terms; unauthorized traffic interception; hidden data exfiltration; production database mutation without approved runbook.
 

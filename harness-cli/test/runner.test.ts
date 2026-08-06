@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -9,7 +9,7 @@ import { runPlan } from '../src/runner.ts';
 import { exitCodeForManifest } from '../src/exit-codes.ts';
 import { classifyChanges } from '../src/classifier.ts';
 import { createPlan } from '../src/planner.ts';
-import type { ApprovalRecord, ContractBundle, ExecutionContext, ExecutionPlan, GateDefinition } from '../src/types.ts';
+import type { ApprovalRecord, ContractBundle, ExecutionContext, ExecutionPlan, GateDefinition, RuleAttestationRecord } from '../src/types.ts';
 
 const approvalContext = { repository: 'nicejoyce/enterprise-development-harness', pull_request: 42 };
 
@@ -18,13 +18,13 @@ async function runnerFixture(gates: GateDefinition[], commands: ContractBundle['
   const harnessRoot = path.join(root, 'harness');
   await mkdir(harnessRoot);
   const ruleIds = gates.map((_, index) => `TEST-${String(index + 1).padStart(3, '0')}`);
-  const bundle = {
+  const bundle: ContractBundle = {
     root: harnessRoot,
     profile: { version: 1, project: { name: 'runner', owner: 'engineering', data_classification: 'internal' }, commands, approvals: { roles: { engineering: ['engineering'] } as Record<string, string[]> } },
     gates: { version: 1, gates },
     routes: { version: 1, routes: [{ id: 'route.test', include: ['**/*'], rules: ruleIds, gates: gates.map((gate) => gate.id), approvals }] },
     registry: { version: 3, modules: { quality: { prefix: 'TEST', owner: 'quality' } }, rules: gates.map((gate, index) => ({ id: ruleIds[index], module: 'quality', severity: gate.severity, gates: [gate.id], exception_allowed: gate.exception_allowed })) },
-  } satisfies ContractBundle;
+  };
   const classification = classifyChanges(bundle, { changed_files: ['src/test.txt'], operation: 'merge', target_environment: 'test' });
   const plan = await createPlan(bundle, classification, []);
   return { root, bundle, plan };
@@ -45,7 +45,7 @@ async function bindFixtureToGit(fixture: Awaited<ReturnType<typeof runnerFixture
   git('config', 'user.email', 'harness@example.invalid');
   await mkdir(path.join(fixture.root, 'src'), { recursive: true });
   await writeFile(path.join(fixture.root, 'src/test.txt'), 'base\n');
-  git('add', 'src/test.txt');
+  git('add', '.');
   git('commit', '-m', 'base');
   const base = git('rev-parse', 'HEAD');
   await writeFile(path.join(fixture.root, 'src/test.txt'), 'head\n');
@@ -102,6 +102,39 @@ test('records GitHub Actions provenance supplied by the trusted runner context',
   assert.deepEqual(manifest.ci_provenance, ci_provenance);
 });
 
+test('executes trusted commands from a checkout bound to the plan base revision', async () => {
+  const fixture = await runnerFixture([commandGate('gate.trusted', 'trusted')], {
+    trusted: { executable: process.execPath, args: ['-e', 'console.log(process.cwd())'], cwd: '.', timeout_seconds: 5, execution_root: 'trusted-harness' },
+  });
+  const plan = await bindFixtureToGit(fixture);
+  const checkoutParent = await mkdtemp(path.join(tmpdir(), 'harness-trusted-checkout-'));
+  const trustedRoot = path.join(checkoutParent, 'trusted-harness');
+  const clone = spawnSync('git', ['clone', fixture.root, trustedRoot], { encoding: 'utf8' });
+  assert.equal(clone.status, 0, clone.stderr);
+  const checkout = spawnSync('git', ['checkout', '--detach', plan.source_base_revision!], { cwd: trustedRoot, encoding: 'utf8' });
+  assert.equal(checkout.status, 0, checkout.stderr);
+  fixture.bundle.root = trustedRoot;
+
+  const output = path.join(fixture.root, 'trusted-evidence');
+  const manifest = await runPlan(fixture.bundle, plan, { output_dir: output, project_root: fixture.root });
+
+  assert.equal(manifest.result, 'passed');
+  const log = await readFile(path.join(output, manifest.gates[0].log_path!), 'utf8');
+  assert.equal(log.trim(), trustedRoot);
+});
+
+test('rejects trusted commands when the Harness checkout is not the plan base revision', async () => {
+  const fixture = await runnerFixture([commandGate('gate.trusted', 'trusted')], {
+    trusted: { executable: process.execPath, args: ['-e', 'process.exit(0)'], cwd: '.', timeout_seconds: 5, execution_root: 'trusted-harness' },
+  });
+  const plan = await bindFixtureToGit(fixture);
+
+  await assert.rejects(
+    runPlan(fixture.bundle, plan, { output_dir: path.join(fixture.root, 'untrusted-root'), project_root: fixture.root }),
+    /trusted Harness checkout.*base revision/i,
+  );
+});
+
 test('records nonzero exit and blocks dependent gates', async () => {
   const fixture = await runnerFixture([commandGate('gate.fail', 'fail'), commandGate('gate.after', 'after', ['gate.fail'])], {
     fail: { executable: process.execPath, args: ['-e', 'process.exit(9)'], cwd: '.', timeout_seconds: 5 },
@@ -148,6 +181,43 @@ test('passes a manual review only with a valid approval record', async () => {
   assert.equal(withApproval.gates[0].approval_id, 'APP-GH-101-engineering');
 });
 
+test('requires every planned human rule attestation before executing gates', async () => {
+  const fixture = await runnerFixture([commandGate('gate.pass', 'pass')], {
+    pass: { executable: process.execPath, args: ['-e', 'process.exit(0)'], cwd: '.', timeout_seconds: 5 },
+  });
+  fixture.bundle.registry = {
+    version: 4,
+    modules: { quality: { prefix: 'TEST', owner: 'quality' } },
+    rules: [{
+      id: 'TEST-001', module: 'quality', severity: 'BLOCKER', gates: ['gate.pass'], exception_allowed: false,
+      enforcement: { mode: 'human-attested', attestation_policy_id: 'attestation.test-001' },
+    }],
+  };
+  await mkdir(path.join(fixture.bundle.root, 'contracts'), { recursive: true });
+  await writeFile(path.join(fixture.bundle.root, 'contracts/rule-attestation-policies.yaml'), [
+    'version: 1',
+    'policies:',
+    '  - id: attestation.test-001',
+    '    rule_ids: [TEST-001]',
+    '    roles: [engineering]',
+    "    checklist_version: '1'",
+    '    required_claims: [requirements-reviewed, evidence-reviewed, residual-risk-accepted]',
+    '',
+  ].join('\n'));
+  const plan = await bindFixtureToGit(fixture, true);
+  await assert.rejects(
+    () => runPlan(fixture.bundle, plan, { output_dir: path.join(fixture.root, 'missing-rule-attestation'), ...plan.context! }),
+    /RULE_ATTESTATION_MISSING/,
+  );
+  const record: RuleAttestationRecord = {
+    id: 'RAT-GH-123-attestation.test-001', policy_id: 'attestation.test-001', rule_ids: ['TEST-001'], role: 'engineering', approver: 'engineering', source: 'github-review',
+    repository: plan.context!.repository, pull_request: plan.context!.pull_request, commit_sha: plan.source_revision!, checklist_version: '1',
+    claims: ['requirements-reviewed', 'evidence-reviewed', 'residual-risk-accepted'], review_id: 123, attested_at: '2026-08-05T00:00:00.000Z',
+  };
+  const manifest = await runPlan(fixture.bundle, plan, { output_dir: path.join(fixture.root, 'valid-rule-attestation'), rule_attestations: [record], ...plan.context! });
+  assert.equal(manifest.result, 'passed');
+});
+
 test('fails closed when any run context field differs from the plan context', async () => {
   const fixture = await runnerFixture([commandGate('gate.pass', 'pass')], {
     pass: { executable: process.execPath, args: ['-e', 'process.exit(0)'], cwd: '.', timeout_seconds: 5 },
@@ -188,7 +258,7 @@ test('binds evidence to the containing Git repository when Harness is nested', a
   fixture.bundle.root = nestedRoot;
   const plan = await bindFixtureToGit(fixture);
   const manifest = await runPlan(fixture.bundle, plan, { output_dir: path.join(fixture.root, 'nested-evidence') });
-  assert.equal(manifest.repository_root, await realpath(fixture.root));
+  assert.equal(manifest.repository_root, path.resolve(fixture.root));
 });
 
 test('executes npm descriptors on Windows without enabling arbitrary shell commands', { skip: process.platform !== 'win32' }, async () => {

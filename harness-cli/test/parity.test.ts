@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import test from 'node:test';
+
+import { parse } from 'yaml';
 
 import { loadContracts, validateContracts } from '../src/contracts.ts';
 
@@ -19,4 +22,14 @@ test('English and Chinese distributions share machine contracts', async () => {
   assert.deepEqual(chinese.gates, english.gates);
   assert.deepEqual(chinese.routes, english.routes);
   assert.deepEqual(chinese.registry, english.registry);
+  const [englishInventory, chineseInventory] = await Promise.all([
+    readFile(path.join(englishRoot, 'contracts/enforcement-inventory.yaml'), 'utf8').then((source) => parse(source)),
+    readFile(path.join(chineseRoot, 'contracts/enforcement-inventory.yaml'), 'utf8').then((source) => parse(source)),
+  ]);
+  assert.deepEqual(chineseInventory, englishInventory);
+  const [englishPlatforms, chinesePlatforms] = await Promise.all([
+    readFile(path.join(englishRoot, 'contracts/platform-policy.yaml'), 'utf8').then((source) => parse(source)),
+    readFile(path.join(chineseRoot, 'contracts/platform-policy.yaml'), 'utf8').then((source) => parse(source)),
+  ]);
+  assert.deepEqual(chinesePlatforms, englishPlatforms);
 });

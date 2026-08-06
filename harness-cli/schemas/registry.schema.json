@@ -1,10 +1,10 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["version", "modules", "rules"],
-  "properties": {
-    "version": { "const": 3 },
+  "oneOf": [
+    { "$ref": "#/definitions/registryV3" },
+    { "$ref": "#/definitions/registryV4" }
+  ],
+  "definitions": {
     "modules": {
       "type": "object",
       "minProperties": 1,
@@ -18,23 +18,119 @@
         }
       }
     },
-    "rules": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["id", "module", "severity", "gates", "exception_allowed"],
-        "properties": {
-          "id": { "type": "string", "pattern": "^[A-Z]+-[0-9]{3}$" },
-          "module": { "type": "string", "minLength": 1 },
-          "severity": { "enum": ["BLOCKER", "REQUIRED", "CONDITIONAL"] },
-          "gates": { "type": "array", "minItems": 1, "items": { "type": "string" }, "uniqueItems": true },
-          "exception_allowed": { "type": "boolean" }
+    "ruleProperties": {
+      "id": { "type": "string", "pattern": "^[A-Z]+-[0-9]{3}$" },
+      "module": { "type": "string", "minLength": 1 },
+      "severity": { "enum": ["BLOCKER", "REQUIRED", "CONDITIONAL"] },
+      "gates": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+      "exception_allowed": { "type": "boolean" }
+    },
+    "ruleV3": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "module", "severity", "gates", "exception_allowed"],
+      "properties": {
+        "id": { "$ref": "#/definitions/ruleProperties/id" },
+        "module": { "$ref": "#/definitions/ruleProperties/module" },
+        "severity": { "$ref": "#/definitions/ruleProperties/severity" },
+        "gates": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "uniqueItems": true
         },
-        "allOf": [
-          { "if": { "properties": { "severity": { "const": "BLOCKER" } } }, "then": { "properties": { "exception_allowed": { "const": false } } } }
-        ]
+        "exception_allowed": { "$ref": "#/definitions/ruleProperties/exception_allowed" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "severity": { "const": "BLOCKER" } } },
+          "then": { "properties": { "exception_allowed": { "const": false } } }
+        }
+      ]
+    },
+    "machineEnforcement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "verifier_gate_ids"],
+      "properties": {
+        "mode": { "const": "machine-enforced" },
+        "verifier_gate_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^gate\\.[a-z0-9][a-z0-9.-]*$" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "humanEnforcement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "attestation_policy_id"],
+      "properties": {
+        "mode": { "const": "human-attested" },
+        "attestation_policy_id": {
+          "type": "string",
+          "pattern": "^attestation\\.[a-z0-9][a-z0-9.-]*$"
+        }
+      }
+    },
+    "advisoryEnforcement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": { "mode": { "const": "advisory" } }
+    },
+    "ruleV4": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "module", "severity", "gates", "exception_allowed", "enforcement"],
+      "properties": {
+        "id": { "$ref": "#/definitions/ruleProperties/id" },
+        "module": { "$ref": "#/definitions/ruleProperties/module" },
+        "severity": { "$ref": "#/definitions/ruleProperties/severity" },
+        "gates": { "$ref": "#/definitions/ruleProperties/gates" },
+        "exception_allowed": { "$ref": "#/definitions/ruleProperties/exception_allowed" },
+        "enforcement": {
+          "oneOf": [
+            { "$ref": "#/definitions/machineEnforcement" },
+            { "$ref": "#/definitions/humanEnforcement" },
+            { "$ref": "#/definitions/advisoryEnforcement" }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "severity": { "const": "BLOCKER" } } },
+          "then": { "properties": { "exception_allowed": { "const": false } } }
+        }
+      ]
+    },
+    "registryV3": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "modules", "rules"],
+      "properties": {
+        "version": { "const": 3 },
+        "modules": { "$ref": "#/definitions/modules" },
+        "rules": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/ruleV3" }
+        }
+      }
+    },
+    "registryV4": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "modules", "rules"],
+      "properties": {
+        "version": { "const": 4 },
+        "modules": { "$ref": "#/definitions/modules" },
+        "rules": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/ruleV4" }
+        }
       }
     }
   }

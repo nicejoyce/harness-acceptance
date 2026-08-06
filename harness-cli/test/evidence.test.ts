@@ -50,6 +50,19 @@ test('rejects a forged plan snapshot even when the attacker recomputes every dig
   assert.ok(result.diagnostics.some((item) => item.code === 'PLAN_INVALID'));
 });
 
+test('rejects a forged rule attestation snapshot even when all digests are recomputed', async () => {
+  const fixture = await validEvidence();
+  const manifest = JSON.parse(await readFile(fixture.manifestPath, 'utf8')) as EvidenceManifest & { rule_attestations_path?: string; rule_attestations_sha256?: string };
+  assert.ok(manifest.rule_attestations_path);
+  const forged = [{ policy_id: 'attestation.forged' }];
+  await writeFile(path.join(fixture.output, manifest.rule_attestations_path), JSON.stringify(forged));
+  manifest.rule_attestations_sha256 = sha256(JSON.stringify(forged));
+  await writeFile(fixture.manifestPath, JSON.stringify(finalizeManifest(manifest as EvidenceManifest)));
+  const result = await verifyEvidence(fixture.bundle.root, fixture.manifestPath);
+  assert.equal(result.valid, false);
+  assert.ok(result.diagnostics.some((item) => item.code === 'RULE_ATTESTATION_INVALID'));
+});
+
 test('rejects evidence whose commit does not match the plan source revision', async () => {
   const fixture = await validEvidence();
   const manifest = JSON.parse(await readFile(fixture.manifestPath, 'utf8')) as EvidenceManifest;

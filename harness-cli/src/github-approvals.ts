@@ -1,8 +1,9 @@
-import type { ApprovalRecord, ContractBundle, ExecutionPlan } from './types.ts';
+import { identityForApproval } from './github-identities.ts';
+import type { ApprovalRecord, ContractBundle, ExecutionPlan, GitHubUserType, IdentitySnapshot } from './types.ts';
 
 export interface GitHubReview {
   id: number;
-  user: { login: string } | null;
+  user: { login: string; type?: GitHubUserType } | null;
   state: string;
   submitted_at: string | null;
   commit_id: string;
@@ -14,7 +15,7 @@ export interface GitHubApprovalContext {
   pull_request: number;
 }
 
-export function createGitHubApprovals(bundle: ContractBundle, plan: ExecutionPlan, reviews: GitHubReview[], context: GitHubApprovalContext): ApprovalRecord[] {
+export function createGitHubApprovals(bundle: ContractBundle, plan: ExecutionPlan, reviews: GitHubReview[], context: GitHubApprovalContext, identitySnapshot: IdentitySnapshot): ApprovalRecord[] {
   if (!plan.source_revision) throw new Error('GitHub approvals require a commit-bound execution plan');
   if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(context.repository) || !Number.isSafeInteger(context.pull_request) || context.pull_request < 1) throw new Error('Invalid GitHub approval context');
   const manualGateIds = plan.gates.filter((gate) => gate.kind === 'manual-review').map((gate) => gate.id).sort();
@@ -29,8 +30,8 @@ export function createGitHubApprovals(bundle: ContractBundle, plan: ExecutionPla
 
   const records: ApprovalRecord[] = [];
   for (const role of plan.approvals) {
-    const identities = bundle.profile.approvals.roles[role] ?? [];
-    const review = identities.map((identity) => latest.get(identity.toLowerCase())).find((candidate) => candidate?.state === 'APPROVED');
+    const authorizedLogins = bundle.profile.approvals.roles[role] ?? [];
+    const review = authorizedLogins.map((identity) => latest.get(identity.toLowerCase())).find((candidate) => candidate?.state === 'APPROVED' && candidate.user && identityForApproval(identitySnapshot, candidate.user.login, { ...context, commit_sha: plan.source_revision! }));
     if (!review?.user || !review.submitted_at) continue;
     const expires = new Date(review.submitted_at);
     expires.setUTCDate(expires.getUTCDate() + 7);

@@ -1,0 +1,15 @@
+name: Nested pull request selection
+on:
+  pull_request_target:
+jobs:
+  publish:
+    if: ${{ github.event['pull_request'].title }}
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ github.event.pull_request.body }}
+    steps:
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.head_ref }}

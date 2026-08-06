@@ -1,4 +1,4 @@
-version: 3
+version: 4
 modules:
   security_identity:
     prefix: SEC
@@ -37,439 +37,606 @@ rules:
   - id: SEC-001
     module: security_identity
     severity: BLOCKER
-    gates: &a1
-      - gate.security-scan
-      - gate.peer-review
+    gates: []
     exception_allowed: false
+    enforcement:
+      mode: human-attested
+      attestation_policy_id: attestation.sec-001
   - id: SEC-002
     module: security_identity
     severity: BLOCKER
-    gates: *a1
+    gates: []
     exception_allowed: false
+    enforcement:
+      mode: human-attested
+      attestation_policy_id: attestation.sec-002
   - id: SEC-003
     module: security_identity
     severity: BLOCKER
-    gates: *a1
+    gates: []
     exception_allowed: false
+    enforcement:
+      mode: human-attested
+      attestation_policy_id: attestation.sec-003
   - id: SEC-004
     module: security_identity
     severity: REQUIRED
-    gates: *a1
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: SEC-005
     module: security_identity
     severity: REQUIRED
-    gates: *a1
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: SEC-006
     module: security_identity
     severity: REQUIRED
-    gates: *a1
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: SEC-007
     module: security_identity
     severity: REQUIRED
-    gates: *a1
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: SEC-008
     module: security_identity
     severity: CONDITIONAL
-    gates: *a1
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
+  - id: SEC-009
+    module: security_identity
+    severity: BLOCKER
+    gates:
+      - gate.control-plane-integrity
+    exception_allowed: false
+    enforcement:
+      mode: machine-enforced
+      verifier_gate_ids:
+        - gate.control-plane-integrity
   - id: DATA-001
     module: data_governance
     severity: BLOCKER
-    gates: &a2
-      - gate.security-scan
-      - gate.integration-test
-      - gate.migration-review
+    gates: []
     exception_allowed: false
+    enforcement:
+      mode: human-attested
+      attestation_policy_id: attestation.data-001
   - id: DATA-002
     module: data_governance
     severity: BLOCKER
-    gates: *a2
+    gates: []
     exception_allowed: false
+    enforcement:
+      mode: human-attested
+      attestation_policy_id: attestation.data-002
   - id: DATA-003
     module: data_governance
     severity: REQUIRED
-    gates: *a2
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DATA-004
     module: data_governance
     severity: REQUIRED
-    gates: *a2
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DATA-005
     module: data_governance
     severity: BLOCKER
-    gates: *a2
+    gates: []
     exception_allowed: false
+    enforcement:
+      mode: human-attested
+      attestation_policy_id: attestation.data-005
   - id: DATA-006
     module: data_governance
     severity: REQUIRED
-    gates: *a2
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DATA-007
     module: data_governance
     severity: REQUIRED
-    gates: *a2
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DATA-008
     module: data_governance
     severity: CONDITIONAL
-    gates: *a2
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: BOUND-001
     module: external_boundaries
     severity: REQUIRED
-    gates: &a3
-      - gate.security-scan
-      - gate.integration-test
-      - gate.peer-review
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: BOUND-002
     module: external_boundaries
     severity: REQUIRED
-    gates: *a3
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: BOUND-003
     module: external_boundaries
     severity: REQUIRED
-    gates: *a3
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: BOUND-004
     module: external_boundaries
     severity: REQUIRED
-    gates: *a3
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: BOUND-005
     module: external_boundaries
     severity: BLOCKER
-    gates: *a3
+    gates: []
     exception_allowed: false
+    enforcement:
+      mode: human-attested
+      attestation_policy_id: attestation.bound-005
   - id: BOUND-006
     module: external_boundaries
     severity: BLOCKER
-    gates: *a3
+    gates: []
     exception_allowed: false
+    enforcement:
+      mode: human-attested
+      attestation_policy_id: attestation.bound-006
   - id: BOUND-007
     module: external_boundaries
     severity: REQUIRED
-    gates: *a3
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: ARCH-001
     module: domain_architecture
     severity: REQUIRED
-    gates: &a4
-      - gate.lint
-      - gate.typecheck
-      - gate.peer-review
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: ARCH-002
     module: domain_architecture
     severity: REQUIRED
-    gates: *a4
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: ARCH-003
     module: domain_architecture
     severity: REQUIRED
-    gates: *a4
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: ARCH-004
     module: domain_architecture
     severity: REQUIRED
-    gates: *a4
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: ARCH-005
     module: domain_architecture
     severity: REQUIRED
-    gates: *a4
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: ARCH-006
     module: domain_architecture
     severity: REQUIRED
-    gates: *a4
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: ARCH-007
     module: domain_architecture
     severity: BLOCKER
-    gates: *a4
+    gates: []
     exception_allowed: false
+    enforcement:
+      mode: human-attested
+      attestation_policy_id: attestation.arch-007
   - id: ARCH-008
     module: domain_architecture
     severity: REQUIRED
-    gates: *a4
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: API-001
     module: api_integration
     severity: REQUIRED
-    gates: &a5
-      - gate.integration-test
-      - gate.peer-review
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: API-002
     module: api_integration
     severity: REQUIRED
-    gates: *a5
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: API-003
     module: api_integration
     severity: REQUIRED
-    gates: *a5
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: API-004
     module: api_integration
     severity: REQUIRED
-    gates: *a5
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: API-005
     module: api_integration
     severity: REQUIRED
-    gates: *a5
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: API-006
     module: api_integration
     severity: CONDITIONAL
-    gates: *a5
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: UI-001
     module: frontend_experience
     severity: BLOCKER
-    gates: &a6
-      - gate.e2e-test
-      - gate.peer-review
+    gates: []
     exception_allowed: false
+    enforcement:
+      mode: human-attested
+      attestation_policy_id: attestation.ui-001
   - id: UI-002
     module: frontend_experience
     severity: REQUIRED
-    gates: *a6
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: UI-003
     module: frontend_experience
     severity: REQUIRED
-    gates: *a6
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: UI-004
     module: frontend_experience
     severity: REQUIRED
-    gates: *a6
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: UI-005
     module: frontend_experience
     severity: REQUIRED
-    gates: *a6
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: UI-006
     module: frontend_experience
     severity: REQUIRED
-    gates: *a6
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: UI-007
     module: frontend_experience
     severity: CONDITIONAL
-    gates: *a6
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: TEST-001
     module: quality_engineering
     severity: REQUIRED
-    gates: &a7
-      - gate.unit-test
-      - gate.peer-review
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: TEST-002
     module: quality_engineering
     severity: REQUIRED
-    gates: *a7
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: TEST-003
     module: quality_engineering
     severity: REQUIRED
-    gates: *a7
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: TEST-004
     module: quality_engineering
     severity: REQUIRED
-    gates: *a7
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: TEST-005
     module: quality_engineering
     severity: REQUIRED
-    gates: *a7
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: TEST-006
     module: quality_engineering
     severity: REQUIRED
-    gates: *a7
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: TEST-007
     module: quality_engineering
     severity: REQUIRED
-    gates: *a7
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: TEST-008
     module: quality_engineering
     severity: REQUIRED
-    gates: *a7
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: TEST-009
     module: quality_engineering
     severity: REQUIRED
-    gates: *a7
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DEP-001
     module: supply_chain
     severity: REQUIRED
-    gates: &a8
-      - gate.security-scan
-      - gate.build
-      - gate.peer-review
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DEP-002
     module: supply_chain
     severity: REQUIRED
-    gates: *a8
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DEP-003
     module: supply_chain
     severity: BLOCKER
-    gates: *a8
+    gates: []
     exception_allowed: false
+    enforcement:
+      mode: human-attested
+      attestation_policy_id: attestation.dep-003
   - id: DEP-004
     module: supply_chain
     severity: REQUIRED
-    gates: *a8
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DEP-005
     module: supply_chain
     severity: REQUIRED
-    gates: *a8
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DEP-006
     module: supply_chain
     severity: REQUIRED
-    gates: *a8
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DEP-007
     module: supply_chain
     severity: REQUIRED
-    gates: *a8
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DEP-008
     module: supply_chain
     severity: CONDITIONAL
-    gates: *a8
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: OPS-001
     module: release_operations
     severity: REQUIRED
-    gates: &a9
-      - gate.build
-      - gate.release-review
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: OPS-002
     module: release_operations
     severity: REQUIRED
-    gates: *a9
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: OPS-003
     module: release_operations
     severity: REQUIRED
-    gates: *a9
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: OPS-004
     module: release_operations
     severity: REQUIRED
-    gates: *a9
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: OPS-005
     module: release_operations
     severity: REQUIRED
-    gates: *a9
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: OPS-006
     module: release_operations
     severity: BLOCKER
-    gates: *a9
+    gates: []
     exception_allowed: false
+    enforcement:
+      mode: human-attested
+      attestation_policy_id: attestation.ops-006
   - id: OPS-007
     module: release_operations
     severity: CONDITIONAL
-    gates: *a9
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DOC-001
     module: documentation_governance
     severity: BLOCKER
-    gates: &a10
-      - gate.peer-review
+    gates: []
     exception_allowed: false
+    enforcement:
+      mode: human-attested
+      attestation_policy_id: attestation.doc-001
   - id: DOC-002
     module: documentation_governance
     severity: REQUIRED
-    gates: *a10
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DOC-003
     module: documentation_governance
     severity: REQUIRED
-    gates: *a10
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DOC-004
     module: documentation_governance
     severity: REQUIRED
-    gates: *a10
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DOC-005
     module: documentation_governance
     severity: REQUIRED
-    gates: *a10
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DOC-006
     module: documentation_governance
     severity: REQUIRED
-    gates: *a10
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: DOC-007
     module: documentation_governance
     severity: REQUIRED
-    gates: *a10
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: AI-001
     module: agent_operations
     severity: REQUIRED
-    gates: &a11
-      - gate.peer-review
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: AI-002
     module: agent_operations
     severity: BLOCKER
-    gates: *a11
+    gates: []
     exception_allowed: false
+    enforcement:
+      mode: human-attested
+      attestation_policy_id: attestation.ai-002
   - id: AI-003
     module: agent_operations
     severity: REQUIRED
-    gates: *a11
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: AI-004
     module: agent_operations
     severity: BLOCKER
-    gates: *a11
+    gates: []
     exception_allowed: false
+    enforcement:
+      mode: human-attested
+      attestation_policy_id: attestation.ai-004
   - id: AI-005
     module: agent_operations
     severity: REQUIRED
-    gates: *a11
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: AI-006
     module: agent_operations
     severity: REQUIRED
-    gates: *a11
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: AI-007
     module: agent_operations
     severity: REQUIRED
-    gates: *a11
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory
   - id: AI-008
     module: agent_operations
     severity: REQUIRED
-    gates: *a11
+    gates: []
     exception_allowed: true
+    enforcement:
+      mode: advisory

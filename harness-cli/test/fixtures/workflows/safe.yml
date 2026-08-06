@@ -1,0 +1,27 @@
+name: Safe
+on:
+  pull_request_target:
+jobs:
+  prepare-context:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect labels as data
+        env:
+          PR_LABELS_JSON: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: node trusted-harness/harness-cli/src/cli.ts plan --risk-labels-json "$PR_LABELS_JSON"
+      - name: Validate project workflow as data
+        run: node trusted-harness/harness-cli/src/cli.ts workflow-policy check --workflow project/.github/workflows/harness.yml --json
+  harness:
+    permissions: {}
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm test
+        working-directory: project
+  harness-final:
+    permissions:
+      checks: write
+    runs-on: ubuntu-latest
+    steps:
+      - run: node trusted-harness/harness-cli/src/cli.ts final verify --input final.signed.json

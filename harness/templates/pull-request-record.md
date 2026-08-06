@@ -1,20 +1,25 @@
 # Change Review Record: <title>
 
-## Summary
+## Human-Authored Responsibility
 
-<What changed and why.>
+Objective: <what outcome is required>
+Design motivation: <why this approach was chosen>
+Risk judgment: <owner assessment>
+Business rationale: <business reason>
+Rollback decision: <when and how to roll back>
 
-## Risk and Approval
+## Signed Harness Facts
 
-Risk record: <path>  
-Approvals: <names/references>
+Do not hand-edit pass/fail state, hashes, platforms, gates, thresholds, tool versions, or approval references. Generate this section with:
 
-## Verification
+`harness records render --manifest <manifest> --final <signed-final> --format markdown`
 
-| Gate | Command | Result | Evidence |
-|---|---|---|---|
-| <gate> | <command> | Pass/Fail/Approved exception | <link/output> |
+<!-- harness-signed-facts:start -->
+<generated signed facts>
+<!-- harness-signed-facts:end -->
 
-## Rollback
+## Supporting Records
 
-<How to reverse the change and how to validate recovery.>
+Risk record: <path>
+Design record: <path>
+Release or rollback record: <path>

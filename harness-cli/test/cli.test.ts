@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { cpSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -40,6 +40,8 @@ test('run rejects a forged blocker exception in a hand-written plan', () => {
     changed_files: ['src/security/token.ts'],
     risk_labels: [],
     route_ids: ['route.default', 'route.security'],
+    rule_ids: ['SEC-001'],
+    rule_attestations: [],
     approvals: ['engineering', 'security'],
     gates: [{ id: 'gate.security-scan', severity: 'BLOCKER', kind: 'command', command: 'security-scan', rule_ids: ['SEC-001'], depends_on: [], exception_id: 'EX-FORGED' }],
   }));
@@ -58,6 +60,8 @@ test('run rejects a hand-written plan that omits routed gates', () => {
     changed_files: ['src/security/token.ts'],
     risk_labels: [],
     route_ids: ['route.default', 'route.security'],
+    rule_ids: ['SEC-001'],
+    rule_attestations: [],
     approvals: ['engineering', 'security'],
     gates: [],
   }));
@@ -100,4 +104,78 @@ test('plan rejects an incomplete GitHub execution context', () => {
   const result = spawnSync(process.execPath, [cli, 'plan', '--root', 'harness', '--changed-file', 'src/example.txt', '--repository', 'nicejoyce/enterprise-development-harness', '--output', path.join(output, 'plan.json'), '--json'], { encoding: 'utf8' });
   assert.equal(result.status, 3, `${result.stdout}\n${result.stderr}`);
   assert.match(JSON.parse(result.stdout).error, /--repository, --pull-request, --base-sha, and --head-sha/);
+});
+
+test('workflow-policy check returns stable JSON for safe and unsafe workflows', () => {
+  const safe = spawnSync(process.execPath, [cli, 'workflow-policy', 'check', '--workflow', 'harness-cli/test/fixtures/workflows/safe.yml', '--json'], { encoding: 'utf8' });
+  assert.equal(safe.status, 0, `${safe.stdout}\n${safe.stderr}`);
+  assert.deepEqual(JSON.parse(safe.stdout), { valid: true, diagnostics: [] });
+
+  const unsafe = spawnSync(process.execPath, [cli, 'workflow-policy', 'check', '--workflow', 'harness-cli/test/fixtures/workflows/inline-pr-expression.yml', '--json'], { encoding: 'utf8' });
+  assert.equal(unsafe.status, 2, `${unsafe.stdout}\n${unsafe.stderr}`);
+  assert.equal(JSON.parse(unsafe.stdout).diagnostics[0].code, 'UNTRUSTED_RUN_INTERPOLATION');
+});
+
+test('workflow-policy check scans a workflow root against its trusted baseline', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'workflow-policy-cli-'));
+  const baselineRoot = path.join(tempRoot, 'baseline');
+  const workflowRoot = path.join(tempRoot, 'head');
+  mkdirSync(baselineRoot);
+  mkdirSync(workflowRoot);
+  writeFileSync(path.join(baselineRoot, 'harness.yml'), readFileSync('harness-cli/test/fixtures/workflows/safe.yml', 'utf8'));
+  writeFileSync(path.join(workflowRoot, 'bypass.yaml'), readFileSync('harness-cli/test/fixtures/workflows/inline-pr-expression.yml', 'utf8'));
+
+  const result = spawnSync(process.execPath, [cli, 'workflow-policy', 'check', '--workflow-root', workflowRoot, '--baseline-workflow-root', baselineRoot, '--json'], { encoding: 'utf8' });
+
+  assert.equal(result.status, 2, `${result.stdout}\n${result.stderr}`);
+  const diagnostics = JSON.parse(result.stdout).diagnostics as Array<{ code: string; document: string }>;
+  assert.ok(diagnostics.some((item) => item.code === 'UNTRUSTED_RUN_INTERPOLATION' && item.document === 'bypass.yaml'));
+  assert.ok(diagnostics.some((item) => item.code === 'TRUSTED_WORKFLOW_REMOVED' && item.document === 'harness.yml'));
+});
+
+test('identities github creates a commit-bound authorization snapshot', () => {
+  const output = mkdtempSync(path.join(tmpdir(), 'harness-identities-cli-'));
+  const subjects = path.join(output, 'subjects.json');
+  const snapshot = path.join(output, 'identities.json');
+  writeFileSync(subjects, JSON.stringify([{ login: 'alice', user_type: 'User', affiliation_state: 'active', api_source: 'github-repository-collaborator-permission', queried_at: '2026-08-05T00:00:00.000Z' }]));
+  const result = spawnSync(process.execPath, [cli, 'identities', 'github', '--repository', 'nicejoyce/repo', '--pull-request', '42', '--base-sha', 'b'.repeat(40), '--head-sha', 'a'.repeat(40), '--author', 'author', '--subjects', subjects, '--captured-at', '2026-08-05T00:00:00.000Z', '--output', snapshot, '--json'], { encoding: 'utf8' });
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  assert.equal(JSON.parse(readFileSync(snapshot, 'utf8')).subjects[0].login, 'alice');
+});
+
+test('attestations agents preserves Bot reviews separately from approvals', () => {
+  const output = mkdtempSync(path.join(tmpdir(), 'harness-agent-attestations-cli-'));
+  const reviews = path.join(output, 'reviews.json');
+  const attestations = path.join(output, 'agent-attestations.json');
+  writeFileSync(reviews, JSON.stringify([{ id: 10, user: { login: 'automation[bot]', type: 'Bot' }, state: 'APPROVED', submitted_at: '2026-08-05T00:00:00.000Z', commit_id: 'a'.repeat(40), body: 'audit' }]));
+  const result = spawnSync(process.execPath, [cli, 'attestations', 'agents', '--repository', 'nicejoyce/repo', '--pull-request', '42', '--base-sha', 'b'.repeat(40), '--head-sha', 'a'.repeat(40), '--reviews', reviews, '--output', attestations, '--json'], { encoding: 'utf8' });
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  assert.equal(JSON.parse(readFileSync(attestations, 'utf8'))[0].actor_type, 'Bot');
+});
+
+test('coverage verify returns structured changed-line coverage diagnostics', () => {
+  const output = mkdtempSync(path.join(tmpdir(), 'harness-coverage-cli-'));
+  const report = path.join(output, 'coverage.json');
+  writeFileSync(report, '{}');
+  const result = spawnSync(process.execPath, [cli, 'coverage', 'verify', '--project-root', '.', '--base', 'HEAD~1', '--head', 'HEAD', '--report', report, '--json'], { encoding: 'utf8' });
+  assert.notEqual(result.status, 0);
+  assert.equal(JSON.parse(result.stdout).valid, false);
+});
+
+test('dependencies classify exposes fail-closed privilege decisions', () => {
+  const output = mkdtempSync(path.join(tmpdir(), 'harness-dependencies-cli-'));
+  const input = path.join(output, 'dependency-change.json');
+  writeFileSync(input, JSON.stringify({ manifest_changed: false, lockfile_changed: true, registry_changed: false, scripts_enabled: false, native_modules_changed: false, network_enabled: false, license_valid: true, sbom_present: true, vulnerability_scan: 'clear' }));
+  const result = spawnSync(process.execPath, [cli, 'dependencies', 'classify', '--root', 'harness', '--input', input, '--json'], { encoding: 'utf8' });
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  assert.equal(JSON.parse(result.stdout).classification.approval_required, true);
+});
+
+test('mutation verify emits structured evidence from a Stryker report', () => {
+  const output = mkdtempSync(path.join(tmpdir(), 'harness-mutation-cli-'));
+  const report = path.join(output, 'mutation.json');
+  writeFileSync(report, JSON.stringify({ files: { 'src/logic.ts': { mutants: [{ status: 'Killed' }] } } }));
+  const result = spawnSync(process.execPath, [cli, 'mutation', 'verify', '--root', 'harness', '--report', report, '--changed-module', 'src/logic.ts', '--json'], { encoding: 'utf8' });
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  assert.equal(JSON.parse(result.stdout).score, 100);
 });

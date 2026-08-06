@@ -1,0 +1,9 @@
+version: 1
+source_binding: protected-base
+changed_test_patterns: ['**/*.test.ts', '**/*.test.js', '**/*.test.mjs', '**/test/**', '**/tests/**']
+test_command: { executable: npm, args: [test] }
+mutation:
+  tool: '@stryker-mutator/core'
+  version: 9.6.1
+  smoke_threshold: 80
+  full_schedule: weekly

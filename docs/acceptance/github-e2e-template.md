@@ -6,10 +6,13 @@
 - Default branch: `main`
 - Independent reviewer: `<record the supplied login>`
 - Reviewer permission: `Write`
-- Required approvals: `1`
+- Required approvals: `2`
 - Required CODEOWNER review: `true`
 - Dismiss stale approvals: `true`
 - Required Harness Check: `harness-final`
+- Expected platform set: `<linux/win32/darwin IDs from signed Plan>`
+- Observed platform set: `<platform IDs from signed Evidence>`
+- Signed delivery record: `<final-record.md artifact or Check summary URL>`
 - Administrator bypass: `disabled`
 - Force push and branch deletion: `disabled`
 - Branch-protection API evidence: `<URL or response artifact>`
@@ -37,6 +40,13 @@
 | Unknown signing key ID | | | | | | | | | failure | | blocked | |
 | Python non-Node fixture | | | | | | | | | success | | allowed | |
 | Author self-approval attempt | | | | | | | | | failure | | blocked | |
+| Bot/App review presented as human rule attestation | | | | | | | | | failure | | blocked | |
+| Generic review presented as rule attestation | | | | | | | | | failure | | blocked | |
+| No-meaning coverage test | | | | | | | | | failure | | blocked | |
+| Base implementation does not fail new regression test | | | | | | | | | failure | | blocked | |
+| Missing, duplicate, or extra platform Evidence | | | | | | | | | failure | | blocked | |
+| Dependency install scripts enabled | | | | | | | | | failure | | blocked | |
+| Unknown path classified as low risk | | | | | | | | | failure | | blocked | |
 
 ## Five-Dimension Reassessment
 

@@ -9,3 +9,5 @@
 | F4 Evolving | Metrics, exception review, organization distribution | Repeat issues become measured improvements |
 
 Do not claim a stage from documents alone; demonstrate actual use of the prior stage.
+
+F4 evidence now includes Shadow Mode platform samples, same-commit and same-Plan pairing, false-negative and flaky-failure rates, and the signed validation service. Platform omission remains disabled until at least 30 valid samples have a zero non-flaky false-negative rate.
